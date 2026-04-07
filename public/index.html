@@ -9,13 +9,13 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:      #131310;
-      --surface: #1C1C18;
-      --card:    #242420;
-      --border:  #323228;
+      --bg:      #0D0D0D;
+      --surface: #181818;
+      --card:    #202020;
+      --border:  #2E2E2E;
       --accent:  #AACC33;
       --text:    #FFFFFF;
-      --muted:   #76766A;
+      --muted:   #737373;
       --radius:  20px;
     }
 
@@ -48,10 +48,7 @@
     ════════════════════════════════════════ */
     #screen-welcome {
       justify-content: flex-end;
-      background:
-        radial-gradient(ellipse 75% 48% at 62% 22%, rgba(170,204,51,.12) 0%, transparent 62%),
-        radial-gradient(ellipse 50% 60% at 12% 80%, rgba(110,90,20,.16) 0%, transparent 55%),
-        linear-gradient(170deg, #1D2309 0%, #0E0E0B 50%, #0B0B09 100%);
+      background: #0D0D0D;
     }
 
     .welcome-top {
@@ -65,16 +62,14 @@
     }
 
     .brand-icon {
-      width: 90px;
-      height: 90px;
-      border-radius: 28px;
-      background: rgba(170,204,51,.12);
-      border: 1.5px solid rgba(170,204,51,.28);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 46px;
+      width: 180px;
+      height: 180px;
       margin-bottom: 32px;
+    }
+    .brand-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .welcome-top h1 {
@@ -191,7 +186,7 @@
       border-color: var(--accent);
       background: rgba(170,204,51,.1);
     }
-    .room-card .room-icon  { font-size: 28px; line-height: 1; }
+    .room-card .room-icon  { font-size: 32px; line-height: 1; }
     .room-card .room-label {
       font-size: 12.5px;
       font-weight: 600;
@@ -381,7 +376,7 @@
 <!-- ── Welcome ─────────────────────────────────────────────────────────────── -->
 <div id="screen-welcome" class="screen active">
   <div class="welcome-top">
-    <div class="brand-icon">🏨</div>
+    <div class="brand-icon"><img src="/apple-touch-icon.png" alt="Room Service"></div>
     <h1>Room Service</h1>
     <p>Your personal concierge, always at your fingertips</p>
   </div>
@@ -444,13 +439,13 @@
 'use strict';
 
 const ROOMS = [
-  { id: 'master',   icon: '🛏️', label: 'Master Suite' },
-  { id: 'room1',    icon: '🚪', label: 'Room 1' },
-  { id: 'room2',    icon: '🚪', label: 'Room 2' },
-  { id: 'room3',    icon: '🚪', label: 'Room 3' },
-  { id: 'room4',    icon: '🚪', label: 'Room 4' },
-  { id: 'office1',  icon: '💼', label: 'Office 1' },
-  { id: 'office2',  icon: '💼', label: 'Office 2' },
+  { id: 'master',   icon: '👑', label: 'Master Suite' },
+  { id: 'room1',    icon: '🛏️', label: 'Room 1' },
+  { id: 'room2',    icon: '🛏️', label: 'Room 2' },
+  { id: 'room3',    icon: '🛏️', label: 'Room 3' },
+  { id: 'room4',    icon: '🛏️', label: 'Room 4' },
+  { id: 'office1',  icon: '🖥️', label: 'Office 1' },
+  { id: 'office2',  icon: '🖥️', label: 'Office 2' },
   { id: 'dining',   icon: '🍽️', label: 'Dining Room' },
   { id: 'living',   icon: '🛋️', label: 'Living Room' },
   { id: 'gym',      icon: '🏋️', label: 'Gym' },
@@ -460,14 +455,14 @@ const ROOMS = [
 ];
 
 const DRINKS = [
-  { id: 'espresso',   emoji: '☕', label: 'Espresso' },
-  { id: 'flat-white', emoji: '☕', label: 'Flat White' },
-  { id: 'cappuccino', emoji: '🥛', label: 'Cappuccino' },
-  { id: 'black-tea',  emoji: '🍵', label: 'Black Tea' },
-  { id: 'green-tea',  emoji: '🍵', label: 'Green Tea' },
-  { id: 'hot-choc',   emoji: '🍫', label: 'Hot Chocolate' },
-  { id: 'water',      emoji: '💧', label: 'Still Water' },
-  { id: 'oj',         emoji: '🧃', label: 'Orange Juice' },
+  { id: 'espresso',   icon: '☕', label: 'Espresso' },
+  { id: 'flat-white', icon: '☕', label: 'Flat White' },
+  { id: 'cappuccino', icon: '🥛', label: 'Cappuccino' },
+  { id: 'black-tea',  icon: '🍵', label: 'Black Tea' },
+  { id: 'green-tea',  icon: '🍵', label: 'Green Tea' },
+  { id: 'hot-choc',   icon: '🍫', label: 'Hot Chocolate' },
+  { id: 'water',      icon: '💧', label: 'Still Water' },
+  { id: 'oj',         icon: '🧃', label: 'Orange Juice' },
 ];
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -515,7 +510,7 @@ DRINKS.forEach(d => {
   const btn = document.createElement('button');
   btn.className = 'drink-btn';
   btn.dataset.id = d.id;
-  btn.innerHTML = `<span class="drink-emoji">${d.emoji}</span><span class="drink-label">${d.label}</span>`;
+  btn.innerHTML = `<span class="drink-emoji">${d.icon}</span><span class="drink-label">${d.label}</span>`;
   btn.addEventListener('click', () => {
     document.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
