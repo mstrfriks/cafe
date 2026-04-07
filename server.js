@@ -1,38 +1,96 @@
-const express = require('express');
-const http = require('http');
-const WebSocket = require('ws');
-const path = require('path');
+'use strict';
 
-const app = express();
+const express = require('express');
+const http    = require('http');
+const WebSocket = require('ws');
+const path    = require('path');
+
+const app    = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const wss    = new WebSocket.Server({ server });
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/service', (req, res) => res.sendFile(path.join(__dirname, 'public', 'service.html')));
 
-const clients = new Set();
-const serviceClients = new Set();
+const orders  = [];
+let   nextId  = 1;
+const sockets = new Set();
+
+// ── ntfy push notification ────────────────────────────────────────────────────
+// Set NTFY_TOPIC env var on Render.com (e.g. "cafe-maison-abc123")
+const NTFY_TOPIC = process.env.NTFY_TOPIC || '';
+
+function notifyService(order) {
+  if (!NTFY_TOPIC) return;
+  fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+    method:  'POST',
+    headers: {
+      'Title':    `☕ ${order.name}`,
+      'Priority': 'high',
+      'Tags':     'coffee',
+    },
+    body: order.drink,
+  }).catch(() => {}); // silent — don't crash server if ntfy is unreachable
+}
 
 wss.on('connection', (ws) => {
-  clients.add(ws);
-  ws.on('message', (data) => {
+  ws.role = null;
+  sockets.add(ws);
+
+  ws.on('message', (raw) => {
     let msg;
-    try { msg = JSON.parse(data); } catch { return; }
-    if (msg.type === 'register' && msg.role === 'service') serviceClients.add(ws);
-    if (msg.type === 'order') {
-      const order = { type: 'order', from: msg.from || 'Inconnu',
-        time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) };
-      for (const svc of serviceClients)
-        if (svc.readyState === WebSocket.OPEN) svc.send(JSON.stringify(order));
+    try { msg = JSON.parse(raw); } catch { return; }
+
+    // ── register ──────────────────────────────────────────────────────────────
+    if (msg.type === 'register') {
+      ws.role = msg.role;
+      if (msg.role === 'service') {
+        // Send current pending orders so the dashboard is accurate after reload
+        send(ws, { type: 'orders', orders: orders.filter(o => o.status === 'pending') });
+      }
+      return;
     }
-    if (msg.type === 'done') {
-      const ack = { type: 'done', orderId: msg.orderId };
-      for (const c of clients)
-        if (c.readyState === WebSocket.OPEN) c.send(JSON.stringify(ack));
+
+    // ── new order ─────────────────────────────────────────────────────────────
+    if (msg.type === 'order') {
+      const name  = String(msg.name  || '').trim().slice(0, 50);
+      const drink = String(msg.drink || '').trim().slice(0, 50);
+      if (!name || !drink) return;
+
+      const order = { id: nextId++, name, drink, at: Date.now(), status: 'pending' };
+      orders.push(order);
+      // Keep memory bounded
+      if (orders.length > 500) orders.splice(0, orders.length - 500);
+
+      broadcast('service', { type: 'new_order', order });
+      send(ws, { type: 'order_confirmed', orderId: order.id });
+      notifyService(order);
+      return;
+    }
+
+    // ── mark ready ────────────────────────────────────────────────────────────
+    if (msg.type === 'ready') {
+      const order = orders.find(o => o.id === msg.orderId && o.status === 'pending');
+      if (!order) return;
+      order.status = 'done';
+      broadcast('client',  { type: 'order_ready',   orderId: order.id });
+      broadcast('service', { type: 'order_removed', orderId: order.id });
     }
   });
-  ws.on('close', () => { clients.delete(ws); serviceClients.delete(ws); });
+
+  ws.on('close', () => sockets.delete(ws));
+  ws.on('error', () => sockets.delete(ws));
 });
 
+function send(ws, msg) {
+  if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
+}
+
+function broadcast(role, msg) {
+  const data = JSON.stringify(msg);
+  for (const ws of sockets) {
+    if (ws.readyState === WebSocket.OPEN && ws.role === role) ws.send(data);
+  }
+}
+
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Café server → http://localhost:${PORT}`));
