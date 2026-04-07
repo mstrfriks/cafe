@@ -1,26 +1,27 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <title>Commander un café</title>
+  <title>Room Service</title>
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --brown:   #5D3A1A;
-      --caramel: #C07941;
-      --cream:   #FDF6EE;
-      --card:    #FFFFFF;
-      --text:    #2D1B0E;
-      --muted:   #9E7B5A;
-      --green:   #2E7D32;
-      --radius:  18px;
+      --bg:      #131310;
+      --surface: #1C1C18;
+      --card:    #242420;
+      --border:  #323228;
+      --accent:  #AACC33;
+      --text:    #FFFFFF;
+      --muted:   #76766A;
+      --radius:  20px;
     }
 
     html, body {
       height: 100%;
-      background: var(--cream);
+      background: var(--bg);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: var(--text);
       -webkit-tap-highlight-color: transparent;
@@ -33,219 +34,407 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       min-height: 100vh;
-      padding: 32px 24px;
-      animation: fadeIn .3s ease;
     }
-    .screen.active { display: flex; }
+    .screen.active {
+      display: flex;
+      animation: fadeIn .28s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes popIn  { from { opacity: 0; transform: scale(.72); } to { opacity: 1; transform: scale(1); } }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    /* ════════════════════════════════════════
+       WELCOME SCREEN
+    ════════════════════════════════════════ */
+    #screen-welcome {
+      justify-content: flex-end;
+      background:
+        radial-gradient(ellipse 75% 48% at 62% 22%, rgba(170,204,51,.12) 0%, transparent 62%),
+        radial-gradient(ellipse 50% 60% at 12% 80%, rgba(110,90,20,.16) 0%, transparent 55%),
+        linear-gradient(170deg, #1D2309 0%, #0E0E0B 50%, #0B0B09 100%);
+    }
 
-    /* ── name screen ── */
-    .logo { font-size: 72px; margin-bottom: 16px; line-height: 1; }
-    h1 { font-size: 32px; font-weight: 700; color: var(--brown); margin-bottom: 8px; }
-    .subtitle { font-size: 17px; color: var(--muted); margin-bottom: 32px; text-align: center; }
-
-    input[type="text"] {
-      width: 100%;
-      max-width: 380px;
-      padding: 18px 20px;
-      font-size: 20px;
-      border: 2px solid #E0C9B0;
-      border-radius: var(--radius);
-      background: var(--card);
-      color: var(--text);
-      outline: none;
-      transition: border-color .2s;
+    .welcome-top {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 32px 24px;
       text-align: center;
     }
-    input[type="text"]:focus { border-color: var(--caramel); }
 
+    .brand-icon {
+      width: 90px;
+      height: 90px;
+      border-radius: 28px;
+      background: rgba(170,204,51,.12);
+      border: 1.5px solid rgba(170,204,51,.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 46px;
+      margin-bottom: 32px;
+    }
+
+    .welcome-top h1 {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 14px;
+      line-height: 1.05;
+    }
+
+    .welcome-top p {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 280px;
+      line-height: 1.55;
+    }
+
+    .welcome-bottom {
+      width: 100%;
+      padding: 24px 28px 52px;
+    }
+
+    /* ════════════════════════════════════════
+       BUTTONS
+    ════════════════════════════════════════ */
     .btn {
       display: block;
       width: 100%;
-      max-width: 380px;
-      margin-top: 16px;
+      max-width: 480px;
+      margin: 0 auto;
       padding: 20px;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       border: none;
-      border-radius: var(--radius);
+      border-radius: 50px;
       cursor: pointer;
-      transition: transform .1s, opacity .2s;
+      transition: transform .12s, opacity .2s;
       -webkit-user-select: none;
       user-select: none;
     }
-    .btn:active { transform: scale(0.97); }
-    .btn-primary { background: var(--brown); color: #fff; }
-    .btn-primary:disabled { opacity: .4; cursor: default; }
+    .btn + .btn { margin-top: 12px; }
+    .btn:active  { transform: scale(.96); }
+    .btn-accent  { background: var(--accent); color: #181A08; }
+    .btn-accent:disabled { opacity: .3; cursor: default; }
 
-    /* ── order screen ── */
-    .order-header {
+    /* ════════════════════════════════════════
+       SHARED SCREEN HEADER
+    ════════════════════════════════════════ */
+    .screen-header {
       width: 100%;
-      max-width: 600px;
+      padding: 22px 22px 18px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 28px;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
-    #greeting { font-size: 22px; font-weight: 700; color: var(--brown); }
-    #change-name {
-      background: none;
-      border: 1.5px solid #C9A87C;
-      border-radius: 50px;
-      padding: 8px 16px;
-      font-size: 15px;
-      color: var(--muted);
+
+    .back-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
       cursor: pointer;
+      color: var(--text);
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    .back-btn:active { background: var(--border); }
+
+    .screen-header-text h2  { font-size: 22px; font-weight: 700; }
+    .screen-header-text p   { font-size: 14px; color: var(--muted); margin-top: 2px; }
+
+    .screen-scroll {
+      width: 100%;
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px 18px 44px;
     }
 
-    h2 { font-size: 26px; font-weight: 700; color: var(--brown); margin-bottom: 24px; text-align: center; }
+    /* ════════════════════════════════════════
+       ROOM SELECTION
+    ════════════════════════════════════════ */
+    #screen-room { background: var(--bg); }
 
-    /* ── drink grid ── */
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .room-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, transform .1s;
+    }
+    .room-card:active { transform: scale(.93); }
+    .room-card.selected {
+      border-color: var(--accent);
+      background: rgba(170,204,51,.1);
+    }
+    .room-card .room-icon  { font-size: 28px; line-height: 1; }
+    .room-card .room-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* ════════════════════════════════════════
+       ORDER SCREEN
+    ════════════════════════════════════════ */
+    #screen-order { background: var(--bg); }
+
+    .order-topbar {
+      width: 100%;
+      padding: 22px 22px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .order-topbar h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.3px;
+    }
+
+    .room-pill {
+      background: rgba(170,204,51,.13);
+      border: 1px solid rgba(170,204,51,.32);
+      color: var(--accent);
+      border-radius: 50px;
+      padding: 9px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .room-pill:active { background: rgba(170,204,51,.22); }
+
+    .order-body {
+      width: 100%;
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 22px 18px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      align-self: flex-start;
+      margin-bottom: 14px;
+      width: 100%;
+      max-width: 560px;
+    }
+
     .drinks-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 11px;
       width: 100%;
-      max-width: 600px;
-      margin-bottom: 28px;
+      max-width: 560px;
     }
 
     .drink-btn {
       background: var(--card);
-      border: 2.5px solid #E0C9B0;
+      border: 1.5px solid var(--border);
       border-radius: var(--radius);
-      padding: 22px 16px;
+      padding: 18px 16px;
       cursor: pointer;
       transition: border-color .15s, background .15s, transform .1s;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 13px;
       -webkit-user-select: none;
       user-select: none;
     }
-    .drink-btn:active { transform: scale(0.96); }
+    .drink-btn:active { transform: scale(.96); }
     .drink-btn.selected {
-      border-color: var(--caramel);
-      background: #FFF3E0;
+      border-color: var(--accent);
+      background: rgba(170,204,51,.1);
     }
-    .drink-btn .drink-emoji { font-size: 40px; line-height: 1; }
-    .drink-btn .drink-label { font-size: 16px; font-weight: 600; color: var(--text); text-align: center; }
+    .drink-btn .drink-emoji { font-size: 30px; line-height: 1; flex-shrink: 0; }
+    .drink-btn .drink-label { font-size: 15px; font-weight: 600; color: var(--text); }
 
-    /* ── confirm screen ── */
+    .order-footer {
+      width: 100%;
+      padding: 14px 18px 44px;
+      flex-shrink: 0;
+    }
+
+    /* ════════════════════════════════════════
+       CONFIRM SCREEN
+    ════════════════════════════════════════ */
+    #screen-confirm {
+      background: var(--bg);
+      justify-content: center;
+      padding: 40px 28px;
+    }
+
     .confirm-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 16px;
+      text-align: center;
       animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
     }
-    @keyframes popIn { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
-    .confirm-icon {
+
+    .confirm-check {
       width: 100px;
       height: 100px;
       border-radius: 50%;
-      background: var(--green);
-      color: #fff;
-      font-size: 52px;
+      background: var(--accent);
+      color: #181A08;
+      font-size: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: 8px;
     }
-    .confirm-card h2 { color: var(--green); font-size: 30px; }
-    #confirm-text { font-size: 18px; color: var(--muted); text-align: center; }
 
-    /* ── ready overlay ── */
+    .confirm-card h2   { font-size: 32px; font-weight: 800; }
+    .confirm-card .sub { font-size: 17px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
+
+    /* ════════════════════════════════════════
+       READY OVERLAY
+    ════════════════════════════════════════ */
     #ready-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.55);
+      background: rgba(0,0,0,.78);
       z-index: 100;
       align-items: center;
       justify-content: center;
-      animation: fadeIn .3s ease;
+      padding: 28px;
     }
     #ready-overlay.visible { display: flex; }
-    .ready-card {
-      background: var(--card);
-      border-radius: 28px;
-      padding: 48px 40px;
-      text-align: center;
-      animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
-    }
-    .ready-card .ready-emoji { font-size: 72px; display: block; margin-bottom: 12px; }
-    .ready-card h2 { font-size: 32px; color: var(--brown); margin-bottom: 8px; }
-    .ready-card p { font-size: 18px; color: var(--muted); }
-    .btn-dismiss {
-      margin-top: 28px;
-      background: var(--brown);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 16px 40px;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-    }
 
-    /* ── connection dot ── */
+    .ready-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 52px 36px;
+      text-align: center;
+      width: 100%;
+      max-width: 380px;
+      animation: popIn .45s cubic-bezier(.34,1.56,.64,1);
+    }
+    .ready-emoji { font-size: 76px; display: block; margin-bottom: 20px; }
+    .ready-card h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+    .ready-card p  { font-size: 17px; color: var(--muted); margin-bottom: 36px; }
+
+    /* ════════════════════════════════════════
+       CONNECTION DOT
+    ════════════════════════════════════════ */
     #conn-dot {
       position: fixed;
       bottom: 18px;
       right: 18px;
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: #ccc;
+      background: #444;
       transition: background .4s;
     }
-    #conn-dot.ok  { background: #43A047; }
-    #conn-dot.err { background: #E53935; }
+    #conn-dot.ok  { background: var(--accent); }
+    #conn-dot.err { background: #EF5350; }
   </style>
 </head>
 <body>
 
-<!-- ── Name screen ───────────────────────────────────────────────────── -->
-<div id="screen-name" class="screen active">
-  <div class="logo">☕</div>
-  <h1>Bonjour !</h1>
-  <p class="subtitle">Entrez votre prénom pour commander</p>
-  <input id="name-input" type="text" placeholder="Votre prénom…" autocomplete="off" autocorrect="off">
-  <button id="name-submit" class="btn btn-primary" disabled>Continuer →</button>
-</div>
-
-<!-- ── Order screen ──────────────────────────────────────────────────── -->
-<div id="screen-order" class="screen">
-  <div class="order-header">
-    <span id="greeting"></span>
-    <button id="change-name">✎ Changer</button>
+<!-- ── Welcome ─────────────────────────────────────────────────────────────── -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-top">
+    <div class="brand-icon">🏨</div>
+    <h1>Room Service</h1>
+    <p>Your personal concierge, always at your fingertips</p>
   </div>
-  <h2>Que souhaitez-vous ?</h2>
-  <div class="drinks-grid" id="drinks-grid"></div>
-  <button id="order-btn" class="btn btn-primary" disabled>Commander</button>
+  <div class="welcome-bottom">
+    <button id="get-started" class="btn btn-accent">Get Started</button>
+  </div>
 </div>
 
-<!-- ── Confirm screen ────────────────────────────────────────────────── -->
+<!-- ── Room selection ──────────────────────────────────────────────────────── -->
+<div id="screen-room" class="screen">
+  <div class="screen-header">
+    <button class="back-btn" id="room-back">←</button>
+    <div class="screen-header-text">
+      <h2>Choose your room</h2>
+      <p>Where should we bring your order?</p>
+    </div>
+  </div>
+  <div class="screen-scroll">
+    <div class="rooms-grid" id="rooms-grid"></div>
+  </div>
+</div>
+
+<!-- ── Order ───────────────────────────────────────────────────────────────── -->
+<div id="screen-order" class="screen">
+  <div class="order-topbar">
+    <h1>Room Service</h1>
+    <button class="room-pill" id="room-pill">— ▾</button>
+  </div>
+  <div class="order-body">
+    <p class="section-label">What would you like?</p>
+    <div class="drinks-grid" id="drinks-grid"></div>
+  </div>
+  <div class="order-footer">
+    <button id="order-btn" class="btn btn-accent" disabled>Place Order</button>
+  </div>
+</div>
+
+<!-- ── Confirm ─────────────────────────────────────────────────────────────── -->
 <div id="screen-confirm" class="screen">
   <div class="confirm-card">
-    <div class="confirm-icon">✓</div>
-    <h2>Commande envoyée !</h2>
-    <p id="confirm-text"></p>
+    <div class="confirm-check">✓</div>
+    <h2>Order Placed!</h2>
+    <p class="sub" id="confirm-text"></p>
   </div>
 </div>
 
-<!-- ── Ready overlay ─────────────────────────────────────────────────── -->
+<!-- ── Ready overlay ───────────────────────────────────────────────────────── -->
 <div id="ready-overlay">
   <div class="ready-card">
     <span class="ready-emoji">☕</span>
-    <h2>C'est prêt !</h2>
-    <p>Votre commande est prête à être servie.</p>
-    <button class="btn-dismiss" id="dismiss-ready">Super, merci !</button>
+    <h2>It's Ready!</h2>
+    <p>Your order is on its way.</p>
+    <button class="btn btn-accent" id="dismiss-ready">Perfect, thank you!</button>
   </div>
 </div>
 
@@ -254,41 +443,74 @@
 <script>
 'use strict';
 
-// ── Drinks catalogue ────────────────────────────────────────────────────────
-const DRINKS = [
-  { id: 'cafe',        emoji: '☕', label: 'Café' },
-  { id: 'cafe-creme',  emoji: '☕', label: 'Café crème' },
-  { id: 'cappuccino',  emoji: '🥛', label: 'Cappuccino' },
-  { id: 'the-noir',    emoji: '🍵', label: 'Thé noir' },
-  { id: 'the-vert',    emoji: '🍵', label: 'Thé vert' },
-  { id: 'chocolat',    emoji: '🍫', label: 'Chocolat chaud' },
-  { id: 'eau',         emoji: '💧', label: 'Eau' },
-  { id: 'jus',         emoji: '🧃', label: 'Jus d\'orange' },
+const ROOMS = [
+  { id: 'master',   icon: '🛏️', label: 'Master Suite' },
+  { id: 'room1',    icon: '🚪', label: 'Room 1' },
+  { id: 'room2',    icon: '🚪', label: 'Room 2' },
+  { id: 'room3',    icon: '🚪', label: 'Room 3' },
+  { id: 'room4',    icon: '🚪', label: 'Room 4' },
+  { id: 'office1',  icon: '💼', label: 'Office 1' },
+  { id: 'office2',  icon: '💼', label: 'Office 2' },
+  { id: 'dining',   icon: '🍽️', label: 'Dining Room' },
+  { id: 'living',   icon: '🛋️', label: 'Living Room' },
+  { id: 'gym',      icon: '🏋️', label: 'Gym' },
+  { id: 'wellness', icon: '🧘', label: 'Wellness' },
+  { id: 'kitchen',  icon: '🍳', label: 'Kitchen' },
+  { id: 'pool',     icon: '🏊', label: 'Swimming Pool' },
 ];
 
-// ── State ───────────────────────────────────────────────────────────────────
-let myName       = localStorage.getItem('cafe_name') || '';
-let selectedDrink = null;
+const DRINKS = [
+  { id: 'espresso',   emoji: '☕', label: 'Espresso' },
+  { id: 'flat-white', emoji: '☕', label: 'Flat White' },
+  { id: 'cappuccino', emoji: '🥛', label: 'Cappuccino' },
+  { id: 'black-tea',  emoji: '🍵', label: 'Black Tea' },
+  { id: 'green-tea',  emoji: '🍵', label: 'Green Tea' },
+  { id: 'hot-choc',   emoji: '🍫', label: 'Hot Chocolate' },
+  { id: 'water',      emoji: '💧', label: 'Still Water' },
+  { id: 'oj',         emoji: '🧃', label: 'Orange Juice' },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let myRoom         = localStorage.getItem('rs_room') || '';
+let selectedDrink  = null;
 let pendingOrderId = null;
 let ws;
 let reconnectDelay = 1000;
 
-// ── DOM refs ────────────────────────────────────────────────────────────────
-const screenName    = document.getElementById('screen-name');
+// ── DOM refs ──────────────────────────────────────────────────────────────────
+const screenWelcome = document.getElementById('screen-welcome');
+const screenRoom    = document.getElementById('screen-room');
 const screenOrder   = document.getElementById('screen-order');
 const screenConfirm = document.getElementById('screen-confirm');
-const nameInput     = document.getElementById('name-input');
-const nameSubmit    = document.getElementById('name-submit');
-const greetingEl    = document.getElementById('greeting');
-const changeName    = document.getElementById('change-name');
+const roomsGrid     = document.getElementById('rooms-grid');
 const drinksGrid    = document.getElementById('drinks-grid');
 const orderBtn      = document.getElementById('order-btn');
+const roomPill      = document.getElementById('room-pill');
 const confirmText   = document.getElementById('confirm-text');
 const readyOverlay  = document.getElementById('ready-overlay');
-const dismissReady  = document.getElementById('dismiss-ready');
 const connDot       = document.getElementById('conn-dot');
 
-// ── Build drink grid ────────────────────────────────────────────────────────
+const ALL_SCREENS = [screenWelcome, screenRoom, screenOrder, screenConfirm];
+function showScreen(el) {
+  ALL_SCREENS.forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Room grid ─────────────────────────────────────────────────────────────────
+ROOMS.forEach(r => {
+  const card = document.createElement('button');
+  card.className = 'room-card';
+  card.dataset.id = r.id;
+  card.innerHTML = `<span class="room-icon">${r.icon}</span><span class="room-label">${r.label}</span>`;
+  card.addEventListener('click', () => {
+    myRoom = r.label;
+    localStorage.setItem('rs_room', myRoom);
+    enterOrderScreen();
+  });
+  roomsGrid.appendChild(card);
+});
+
+// ── Drink grid ────────────────────────────────────────────────────────────────
 DRINKS.forEach(d => {
   const btn = document.createElement('button');
   btn.className = 'drink-btn';
@@ -303,59 +525,42 @@ DRINKS.forEach(d => {
   drinksGrid.appendChild(btn);
 });
 
-// ── Screen helpers ──────────────────────────────────────────────────────────
-function showScreen(el) {
-  [screenName, screenOrder, screenConfirm].forEach(s => s.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function resetOrderScreen() {
-  document.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('selected'));
-  selectedDrink   = null;
-  orderBtn.disabled = true;
-}
-
-// ── Name screen logic ───────────────────────────────────────────────────────
-nameInput.addEventListener('input', () => {
-  nameSubmit.disabled = nameInput.value.trim().length === 0;
+// ── Navigation ────────────────────────────────────────────────────────────────
+document.getElementById('get-started').addEventListener('click', () => {
+  if (myRoom) enterOrderScreen();
+  else showScreen(screenRoom);
 });
-nameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !nameSubmit.disabled) saveName(); });
-nameSubmit.addEventListener('click', saveName);
 
-function saveName() {
-  myName = nameInput.value.trim();
-  localStorage.setItem('cafe_name', myName);
-  enterOrderScreen();
-}
-
-changeName.addEventListener('click', () => {
-  nameInput.value = myName;
-  nameSubmit.disabled = false;
-  showScreen(screenName);
+document.getElementById('room-back').addEventListener('click', () => {
+  showScreen(myRoom ? screenOrder : screenWelcome);
 });
+
+roomPill.addEventListener('click', () => showScreen(screenRoom));
 
 function enterOrderScreen() {
-  greetingEl.textContent = `Bonjour, ${myName} !`;
-  resetOrderScreen();
+  roomPill.textContent = `${myRoom} ▾`;
+  selectedDrink = null;
+  orderBtn.disabled = true;
+  document.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('selected'));
   showScreen(screenOrder);
 }
 
-// ── Order button ────────────────────────────────────────────────────────────
+// ── Order ─────────────────────────────────────────────────────────────────────
 orderBtn.addEventListener('click', () => {
-  if (!selectedDrink || !myName) return;
+  if (!selectedDrink || !myRoom) return;
   if (!ws || ws.readyState !== WebSocket.OPEN) return;
-  ws.send(JSON.stringify({ type: 'order', name: myName, drink: selectedDrink }));
+  ws.send(JSON.stringify({ type: 'order', name: myRoom, drink: selectedDrink }));
   orderBtn.disabled = true;
 });
 
-// ── Ready overlay ───────────────────────────────────────────────────────────
-dismissReady.addEventListener('click', () => {
+// ── Ready overlay ─────────────────────────────────────────────────────────────
+document.getElementById('dismiss-ready').addEventListener('click', () => {
   readyOverlay.classList.remove('visible');
   pendingOrderId = null;
   enterOrderScreen();
 });
 
-// ── WebSocket ───────────────────────────────────────────────────────────────
+// ── WebSocket ─────────────────────────────────────────────────────────────────
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
   ws = new WebSocket(`${proto}//${location.host}`);
@@ -372,9 +577,8 @@ function connect() {
 
     if (msg.type === 'order_confirmed') {
       pendingOrderId = msg.orderId;
-      confirmText.textContent = `${selectedDrink} pour ${myName} — on s'en occupe !`;
+      confirmText.textContent = `${selectedDrink} → ${myRoom}`;
       showScreen(screenConfirm);
-      // Auto-return after 4 s if not ready yet
       setTimeout(() => {
         if (screenConfirm.classList.contains('active')) enterOrderScreen();
       }, 4000);
@@ -394,13 +598,7 @@ function connect() {
   ws.onerror = () => ws.close();
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────────
-if (myName) {
-  enterOrderScreen();
-} else {
-  showScreen(screenName);
-}
-
+// ── Init ──────────────────────────────────────────────────────────────────────
 connect();
 </script>
 </body>
