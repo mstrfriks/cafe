@@ -2,103 +2,406 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Café</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Commander un café</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-      background: #1a0a00;
-      min-height: 100dvh;
-      display: flex;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brown:   #5D3A1A;
+      --caramel: #C07941;
+      --cream:   #FDF6EE;
+      --card:    #FFFFFF;
+      --text:    #2D1B0E;
+      --muted:   #9E7B5A;
+      --green:   #2E7D32;
+      --radius:  18px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--cream);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* ── screens ── */
+    .screen {
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2rem;
-      padding: 2rem;
+      min-height: 100vh;
+      padding: 32px 24px;
+      animation: fadeIn .3s ease;
     }
-    h1 { color: #f5deb3; font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 300; }
-    #name-input {
-      font-size: 1.2rem;
-      padding: 0.7rem 1.2rem;
-      border-radius: 12px;
-      border: 2px solid #6b3a1f;
-      background: #2d1200;
-      color: #f5deb3;
-      text-align: center;
-      width: min(320px, 90vw);
+    .screen.active { display: flex; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    /* ── name screen ── */
+    .logo { font-size: 72px; margin-bottom: 16px; line-height: 1; }
+    h1 { font-size: 32px; font-weight: 700; color: var(--brown); margin-bottom: 8px; }
+    .subtitle { font-size: 17px; color: var(--muted); margin-bottom: 32px; text-align: center; }
+
+    input[type="text"] {
+      width: 100%;
+      max-width: 380px;
+      padding: 18px 20px;
+      font-size: 20px;
+      border: 2px solid #E0C9B0;
+      border-radius: var(--radius);
+      background: var(--card);
+      color: var(--text);
       outline: none;
+      transition: border-color .2s;
+      text-align: center;
     }
-    #name-input::placeholder { color: #8b6040; }
-    #name-input:focus { border-color: #c47c2b; }
-    #order-btn {
-      width: min(320px, 90vw);
-      padding: 1.4rem 2rem;
-      font-size: clamp(1.3rem, 4vw, 1.7rem);
-      font-weight: 600;
+    input[type="text"]:focus { border-color: var(--caramel); }
+
+    .btn {
+      display: block;
+      width: 100%;
+      max-width: 380px;
+      margin-top: 16px;
+      padding: 20px;
+      font-size: 20px;
+      font-weight: 700;
       border: none;
-      border-radius: 20px;
-      background: linear-gradient(145deg, #c47c2b, #8b4a10);
-      color: #fff8f0;
+      border-radius: var(--radius);
       cursor: pointer;
-      box-shadow: 0 8px 24px rgba(196,124,43,0.4);
-      transition: transform 0.12s, box-shadow 0.12s, opacity 0.2s;
-      -webkit-tap-highlight-color: transparent;
+      transition: transform .1s, opacity .2s;
+      -webkit-user-select: none;
+      user-select: none;
     }
-    #order-btn:active { transform: scale(0.96); }
-    #order-btn:disabled { opacity: 0.5; }
-    #status { font-size: 1.1rem; color: #a07850; min-height: 1.6rem; text-align: center; }
-    #status.success { color: #6bcf7f; }
-    #status.error { color: #e07070; }
-    #status.waiting { color: #f0c060; }
-    #dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: #555; display: inline-block;
-      margin-right: 6px; vertical-align: middle;
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--brown); color: #fff; }
+    .btn-primary:disabled { opacity: .4; cursor: default; }
+
+    /* ── order screen ── */
+    .order-header {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
     }
-    #dot.connected { background: #6bcf7f; }
+    #greeting { font-size: 22px; font-weight: 700; color: var(--brown); }
+    #change-name {
+      background: none;
+      border: 1.5px solid #C9A87C;
+      border-radius: 50px;
+      padding: 8px 16px;
+      font-size: 15px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    h2 { font-size: 26px; font-weight: 700; color: var(--brown); margin-bottom: 24px; text-align: center; }
+
+    /* ── drink grid ── */
+    .drinks-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 28px;
+    }
+
+    .drink-btn {
+      background: var(--card);
+      border: 2.5px solid #E0C9B0;
+      border-radius: var(--radius);
+      padding: 22px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, transform .1s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .drink-btn:active { transform: scale(0.96); }
+    .drink-btn.selected {
+      border-color: var(--caramel);
+      background: #FFF3E0;
+    }
+    .drink-btn .drink-emoji { font-size: 40px; line-height: 1; }
+    .drink-btn .drink-label { font-size: 16px; font-weight: 600; color: var(--text); text-align: center; }
+
+    /* ── confirm screen ── */
+    .confirm-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
+    .confirm-icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-size: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-card h2 { color: var(--green); font-size: 30px; }
+    #confirm-text { font-size: 18px; color: var(--muted); text-align: center; }
+
+    /* ── ready overlay ── */
+    #ready-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn .3s ease;
+    }
+    #ready-overlay.visible { display: flex; }
+    .ready-card {
+      background: var(--card);
+      border-radius: 28px;
+      padding: 48px 40px;
+      text-align: center;
+      animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    .ready-card .ready-emoji { font-size: 72px; display: block; margin-bottom: 12px; }
+    .ready-card h2 { font-size: 32px; color: var(--brown); margin-bottom: 8px; }
+    .ready-card p { font-size: 18px; color: var(--muted); }
+    .btn-dismiss {
+      margin-top: 28px;
+      background: var(--brown);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 16px 40px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── connection dot ── */
+    #conn-dot {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ccc;
+      transition: background .4s;
+    }
+    #conn-dot.ok  { background: #43A047; }
+    #conn-dot.err { background: #E53935; }
   </style>
 </head>
 <body>
-  <h1>☕ Commander un café</h1>
-  <input id="name-input" type="text" placeholder="Votre prénom (optionnel)" maxlength="30">
-  <button id="order-btn">Commander un café</button>
-  <p id="status"><span id="dot"></span>Connexion…</p>
-  <script>
-    const btn = document.getElementById('order-btn');
-    const status = document.getElementById('status');
-    const dot = document.getElementById('dot');
-    const nameInput = document.getElementById('name-input');
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${proto}://${location.host}`);
-    btn.disabled = true;
-    ws.addEventListener('open', () => {
-      dot.className = 'connected';
-      setStatus('Prêt à commander', '');
-      btn.disabled = false;
-    });
-    ws.addEventListener('close', () => {
-      dot.className = '';
-      setStatus('Déconnecté – rechargez la page', 'error');
-      btn.disabled = true;
-    });
-    ws.addEventListener('message', (e) => {
-      const msg = JSON.parse(e.data);
-      if (msg.type === 'done') {
-        setStatus('Votre café est en préparation !', 'success');
-        btn.disabled = false;
-      }
-    });
-    btn.addEventListener('click', () => {
-      if (ws.readyState !== WebSocket.OPEN) return;
-      ws.send(JSON.stringify({ type: 'order', from: nameInput.value.trim() || 'Anonyme' }));
-      btn.disabled = true;
-      setStatus('Commande envoyée…', 'waiting');
-    });
-    function setStatus(text, cls) {
-      status.innerHTML = `<span id="dot" class="${dot.className}"></span>${text}`;
-      status.className = cls;
+
+<!-- ── Name screen ───────────────────────────────────────────────────── -->
+<div id="screen-name" class="screen active">
+  <div class="logo">☕</div>
+  <h1>Bonjour !</h1>
+  <p class="subtitle">Entrez votre prénom pour commander</p>
+  <input id="name-input" type="text" placeholder="Votre prénom…" autocomplete="off" autocorrect="off">
+  <button id="name-submit" class="btn btn-primary" disabled>Continuer →</button>
+</div>
+
+<!-- ── Order screen ──────────────────────────────────────────────────── -->
+<div id="screen-order" class="screen">
+  <div class="order-header">
+    <span id="greeting"></span>
+    <button id="change-name">✎ Changer</button>
+  </div>
+  <h2>Que souhaitez-vous ?</h2>
+  <div class="drinks-grid" id="drinks-grid"></div>
+  <button id="order-btn" class="btn btn-primary" disabled>Commander</button>
+</div>
+
+<!-- ── Confirm screen ────────────────────────────────────────────────── -->
+<div id="screen-confirm" class="screen">
+  <div class="confirm-card">
+    <div class="confirm-icon">✓</div>
+    <h2>Commande envoyée !</h2>
+    <p id="confirm-text"></p>
+  </div>
+</div>
+
+<!-- ── Ready overlay ─────────────────────────────────────────────────── -->
+<div id="ready-overlay">
+  <div class="ready-card">
+    <span class="ready-emoji">☕</span>
+    <h2>C'est prêt !</h2>
+    <p>Votre commande est prête à être servie.</p>
+    <button class="btn-dismiss" id="dismiss-ready">Super, merci !</button>
+  </div>
+</div>
+
+<div id="conn-dot"></div>
+
+<script>
+'use strict';
+
+// ── Drinks catalogue ────────────────────────────────────────────────────────
+const DRINKS = [
+  { id: 'cafe',        emoji: '☕', label: 'Café' },
+  { id: 'cafe-creme',  emoji: '☕', label: 'Café crème' },
+  { id: 'cappuccino',  emoji: '🥛', label: 'Cappuccino' },
+  { id: 'the-noir',    emoji: '🍵', label: 'Thé noir' },
+  { id: 'the-vert',    emoji: '🍵', label: 'Thé vert' },
+  { id: 'chocolat',    emoji: '🍫', label: 'Chocolat chaud' },
+  { id: 'eau',         emoji: '💧', label: 'Eau' },
+  { id: 'jus',         emoji: '🧃', label: 'Jus d\'orange' },
+];
+
+// ── State ───────────────────────────────────────────────────────────────────
+let myName       = localStorage.getItem('cafe_name') || '';
+let selectedDrink = null;
+let pendingOrderId = null;
+let ws;
+let reconnectDelay = 1000;
+
+// ── DOM refs ────────────────────────────────────────────────────────────────
+const screenName    = document.getElementById('screen-name');
+const screenOrder   = document.getElementById('screen-order');
+const screenConfirm = document.getElementById('screen-confirm');
+const nameInput     = document.getElementById('name-input');
+const nameSubmit    = document.getElementById('name-submit');
+const greetingEl    = document.getElementById('greeting');
+const changeName    = document.getElementById('change-name');
+const drinksGrid    = document.getElementById('drinks-grid');
+const orderBtn      = document.getElementById('order-btn');
+const confirmText   = document.getElementById('confirm-text');
+const readyOverlay  = document.getElementById('ready-overlay');
+const dismissReady  = document.getElementById('dismiss-ready');
+const connDot       = document.getElementById('conn-dot');
+
+// ── Build drink grid ────────────────────────────────────────────────────────
+DRINKS.forEach(d => {
+  const btn = document.createElement('button');
+  btn.className = 'drink-btn';
+  btn.dataset.id = d.id;
+  btn.innerHTML = `<span class="drink-emoji">${d.emoji}</span><span class="drink-label">${d.label}</span>`;
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedDrink = d.label;
+    orderBtn.disabled = false;
+  });
+  drinksGrid.appendChild(btn);
+});
+
+// ── Screen helpers ──────────────────────────────────────────────────────────
+function showScreen(el) {
+  [screenName, screenOrder, screenConfirm].forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function resetOrderScreen() {
+  document.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('selected'));
+  selectedDrink   = null;
+  orderBtn.disabled = true;
+}
+
+// ── Name screen logic ───────────────────────────────────────────────────────
+nameInput.addEventListener('input', () => {
+  nameSubmit.disabled = nameInput.value.trim().length === 0;
+});
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !nameSubmit.disabled) saveName(); });
+nameSubmit.addEventListener('click', saveName);
+
+function saveName() {
+  myName = nameInput.value.trim();
+  localStorage.setItem('cafe_name', myName);
+  enterOrderScreen();
+}
+
+changeName.addEventListener('click', () => {
+  nameInput.value = myName;
+  nameSubmit.disabled = false;
+  showScreen(screenName);
+});
+
+function enterOrderScreen() {
+  greetingEl.textContent = `Bonjour, ${myName} !`;
+  resetOrderScreen();
+  showScreen(screenOrder);
+}
+
+// ── Order button ────────────────────────────────────────────────────────────
+orderBtn.addEventListener('click', () => {
+  if (!selectedDrink || !myName) return;
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  ws.send(JSON.stringify({ type: 'order', name: myName, drink: selectedDrink }));
+  orderBtn.disabled = true;
+});
+
+// ── Ready overlay ───────────────────────────────────────────────────────────
+dismissReady.addEventListener('click', () => {
+  readyOverlay.classList.remove('visible');
+  pendingOrderId = null;
+  enterOrderScreen();
+});
+
+// ── WebSocket ───────────────────────────────────────────────────────────────
+function connect() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}`);
+
+  ws.onopen = () => {
+    reconnectDelay = 1000;
+    connDot.className = 'ok';
+    ws.send(JSON.stringify({ type: 'register', role: 'client' }));
+  };
+
+  ws.onmessage = ({ data }) => {
+    let msg;
+    try { msg = JSON.parse(data); } catch { return; }
+
+    if (msg.type === 'order_confirmed') {
+      pendingOrderId = msg.orderId;
+      confirmText.textContent = `${selectedDrink} pour ${myName} — on s'en occupe !`;
+      showScreen(screenConfirm);
+      // Auto-return after 4 s if not ready yet
+      setTimeout(() => {
+        if (screenConfirm.classList.contains('active')) enterOrderScreen();
+      }, 4000);
     }
-  </script>
+
+    if (msg.type === 'order_ready' && msg.orderId === pendingOrderId) {
+      readyOverlay.classList.add('visible');
+    }
+  };
+
+  ws.onclose = () => {
+    connDot.className = 'err';
+    setTimeout(connect, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+if (myName) {
+  enterOrderScreen();
+} else {
+  showScreen(screenName);
+}
+
+connect();
+</script>
 </body>
 </html>
