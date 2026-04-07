@@ -1,0 +1,64 @@
+const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
+const path = require('path');
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+const clients = new Set();
+const serviceClients = new Set();
+
+wss.on('connection', (ws) => {
+  clients.add(ws);
+
+  ws.on('message', (data) => {
+    let msg;
+    try {
+      msg = JSON.parse(data);
+    } catch {
+      return;
+    }
+
+    if (msg.type === 'register' && msg.role === 'service') {
+      serviceClients.add(ws);
+    }
+
+    if (msg.type === 'order') {
+      const order = {
+        type: 'order',
+        from: msg.from || 'Inconnu',
+        time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      };
+      for (const svc of serviceClients) {
+        if (svc.readyState === WebSocket.OPEN) {
+          svc.send(JSON.stringify(order));
+        }
+      }
+    }
+
+    if (msg.type === 'done') {
+      const ack = { type: 'done', orderId: msg.orderId };
+      for (const c of clients) {
+        if (c.readyState === WebSocket.OPEN) {
+          c.send(JSON.stringify(ack));
+        }
+      }
+    }
+  });
+
+  ws.on('close', () => {
+    clients.delete(ws);
+    serviceClients.delete(ws);
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Cafe server running at http://localhost:${PORT}`);
+  console.log(`  Client ordering page : http://localhost:${PORT}/`);
+  console.log(`  Service dashboard    : http://localhost:${PORT}/service`);
+});

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Café</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: #1a0a00;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #f5deb3;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+
+    #name-input {
+      font-size: 1.2rem;
+      padding: 0.7rem 1.2rem;
+      border-radius: 12px;
+      border: 2px solid #6b3a1f;
+      background: #2d1200;
+      color: #f5deb3;
+      text-align: center;
+      width: min(320px, 90vw);
+      outline: none;
+    }
+    #name-input::placeholder { color: #8b6040; }
+    #name-input:focus { border-color: #c47c2b; }
+
+    #order-btn {
+      width: min(320px, 90vw);
+      padding: 1.4rem 2rem;
+      font-size: clamp(1.3rem, 4vw, 1.7rem);
+      font-weight: 600;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #c47c2b, #8b4a10);
+      color: #fff8f0;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(196,124,43,0.4);
+      transition: transform 0.12s, box-shadow 0.12s, opacity 0.2s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #order-btn:active { transform: scale(0.96); box-shadow: 0 3px 10px rgba(196,124,43,0.3); }
+    #order-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #status {
+      font-size: 1.1rem;
+      color: #a07850;
+      min-height: 1.6rem;
+      text-align: center;
+      transition: color 0.3s;
+    }
+    #status.success { color: #6bcf7f; }
+    #status.error   { color: #e07070; }
+    #status.waiting { color: #f0c060; }
+
+    #dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #555;
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+      transition: background 0.3s;
+    }
+    #dot.connected { background: #6bcf7f; }
+  </style>
+</head>
+<body>
+  <h1>☕ Commander un café</h1>
+
+  <input id="name-input" type="text" placeholder="Votre prénom (optionnel)" maxlength="30">
+
+  <button id="order-btn">Commander un café</button>
+
+  <p id="status"><span id="dot"></span>Connexion…</p>
+
+  <script>
+    const btn = document.getElementById('order-btn');
+    const status = document.getElementById('status');
+    const dot = document.getElementById('dot');
+    const nameInput = document.getElementById('name-input');
+
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${location.host}`);
+
+    ws.addEventListener('open', () => {
+      dot.className = 'connected';
+      setStatus('Prêt à commander', '');
+      btn.disabled = false;
+    });
+
+    ws.addEventListener('close', () => {
+      dot.className = '';
+      setStatus('Déconnecté – rechargez la page', 'error');
+      btn.disabled = true;
+    });
+
+    ws.addEventListener('message', (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'done') {
+        setStatus('Votre café est en préparation !', 'success');
+        btn.disabled = false;
+      }
+    });
+
+    btn.disabled = true;
+
+    btn.addEventListener('click', () => {
+      if (ws.readyState !== WebSocket.OPEN) return;
+      const from = nameInput.value.trim() || 'Anonyme';
+      ws.send(JSON.stringify({ type: 'order', from }));
+      btn.disabled = true;
+      setStatus('Commande envoyée…', 'waiting');
+    });
+
+    function setStatus(text, cls) {
+      const dotHtml = `<span id="dot" class="${dot.className}"></span>`;
+      status.innerHTML = `${dotHtml}${text}`;
+      status.className = cls;
+    }
+  </script>
+</body>
+</html>
