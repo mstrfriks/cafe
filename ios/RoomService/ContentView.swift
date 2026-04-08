@@ -66,7 +66,7 @@ struct ModeSelectionView: View {
                             .background(Color(white: 0.12))
                             .cornerRadius(12)
                             .foregroundColor(.white)
-                            .autocorrectionDisabled()
+                            .disableAutocorrection(true)
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
                             .transition(.opacity.combined(with: .move(edge: .top)))
