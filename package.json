@@ -1,20 +1,4 @@
 {
-  "name": "cafe-order",
-  "version": "1.0.0",
-  "description": "iPad café ordering system",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "ws": "^8.16.0"
-  }
-}
-{
   "name": "cafe",
   "version": "1.0.0",
   "engines": { "node": ">=18" },
