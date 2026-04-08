@@ -190,7 +190,7 @@ const DEFAULT_DRINKS = [
 
 let currentRooms  = DEFAULT_ROOMS;
 let currentDrinks = DEFAULT_DRINKS;
-let myRoom         = localStorage.getItem('rs_room') || '';
+let myRoom         = '';
 const drinkQty     = new Map();
 let pendingOrderId = null;
 let ws, reconnectDelay = 1000;
@@ -220,7 +220,6 @@ function buildRoomsGrid(rooms) {
     card.innerHTML = `<span class="room-icon">${r.icon}</span><span class="room-label">${r.label}</span>`;
     card.addEventListener('click', () => {
       myRoom = r.label;
-      localStorage.setItem('rs_room', myRoom);
       enterOrderScreen();
     });
     roomsGrid.appendChild(card);
@@ -306,7 +305,7 @@ function applyConfig(config) {
 }
 
 document.getElementById('get-started').addEventListener('click', () => {
-  if (myRoom) enterOrderScreen(); else showScreen(screenRoom);
+  showScreen(screenRoom);
 });
 document.getElementById('room-back').addEventListener('click', () => {
   showScreen(myRoom ? screenOrder : screenWelcome);
