@@ -10,6 +10,7 @@ const server = http.createServer(app);
 const wss    = new WebSocket.Server({ server });
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/service', (req, res) => res.sendFile(path.join(__dirname, 'service.html')));
 
 const RENDER_URL = process.env.RENDER_EXTERNAL_URL || '';
 if (RENDER_URL) {
