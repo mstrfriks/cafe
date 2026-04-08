@@ -29,7 +29,6 @@
       user-select: none;
     }
 
-    /* ── screens ── */
     .screen {
       display: none;
       flex-direction: column;
@@ -43,332 +42,151 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     @keyframes popIn  { from { opacity: 0; transform: scale(.72); } to { opacity: 1; transform: scale(1); } }
 
-    /* ════════════════════════════════════════
-       WELCOME SCREEN
-    ════════════════════════════════════════ */
-    #screen-welcome {
-      justify-content: flex-end;
-      background: #000000;
-    }
-
+    /* WELCOME */
+    #screen-welcome { justify-content: flex-end; background: #000; }
     .welcome-top {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 32px 24px;
-      text-align: center;
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 32px 24px; text-align: center;
     }
+    .brand-icon { width: 180px; height: 180px; border-radius: 40px; overflow: hidden; margin-bottom: 32px; }
+    .brand-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .welcome-top h1 { font-size: 46px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 14px; }
+    .welcome-top p  { font-size: 17px; color: var(--muted); max-width: 280px; line-height: 1.55; }
+    .welcome-bottom { width: 100%; padding: 24px 28px 52px; }
 
-    .brand-icon {
-      width: 180px;
-      height: 180px;
-      border-radius: 40px;
-      overflow: hidden;
-      margin-bottom: 32px;
-      box-shadow: none;
-    }
-    .brand-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .welcome-top h1 {
-      font-size: 46px;
-      font-weight: 800;
-      letter-spacing: -1.5px;
-      margin-bottom: 14px;
-      line-height: 1.05;
-    }
-
-    .welcome-top p {
-      font-size: 17px;
-      color: var(--muted);
-      max-width: 280px;
-      line-height: 1.55;
-    }
-
-    .welcome-bottom {
-      width: 100%;
-      padding: 24px 28px 52px;
-    }
-
-    /* ════════════════════════════════════════
-       BUTTONS
-    ════════════════════════════════════════ */
+    /* BUTTONS */
     .btn {
-      display: block;
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 20px;
-      font-size: 18px;
-      font-weight: 700;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: transform .12s, opacity .2s;
-      -webkit-user-select: none;
-      user-select: none;
+      display: block; width: 100%; max-width: 480px; margin: 0 auto;
+      padding: 20px; font-size: 18px; font-weight: 700; border: none;
+      border-radius: 50px; cursor: pointer; transition: transform .12s, opacity .2s;
     }
     .btn + .btn { margin-top: 12px; }
     .btn:active  { transform: scale(.96); }
     .btn-accent  { background: var(--accent); color: #181A08; }
     .btn-accent:disabled { opacity: .3; cursor: default; }
 
-    /* ════════════════════════════════════════
-       SHARED SCREEN HEADER
-    ════════════════════════════════════════ */
+    /* SHARED HEADER */
     .screen-header {
-      width: 100%;
-      padding: 22px 22px 18px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
+      width: 100%; padding: 22px 22px 18px;
+      display: flex; align-items: center; gap: 16px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
     }
-
     .back-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--card);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 19px;
-      cursor: pointer;
-      color: var(--text);
-      flex-shrink: 0;
-      transition: background .15s;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--card); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px; cursor: pointer; color: var(--text); flex-shrink: 0;
     }
     .back-btn:active { background: var(--border); }
-
-    .screen-header-text h2  { font-size: 22px; font-weight: 700; }
-    .screen-header-text p   { font-size: 14px; color: var(--muted); margin-top: 2px; }
-
+    .screen-header-text h2 { font-size: 22px; font-weight: 700; }
+    .screen-header-text p  { font-size: 14px; color: var(--muted); margin-top: 2px; }
     .screen-scroll {
-      width: 100%;
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 20px 18px 44px;
+      width: 100%; flex: 1; overflow-y: auto;
+      -webkit-overflow-scrolling: touch; padding: 20px 18px 44px;
     }
 
-    /* ════════════════════════════════════════
-       ROOM SELECTION
-    ════════════════════════════════════════ */
+    /* ROOM SELECTION */
     #screen-room { background: var(--bg); }
-
     .rooms-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 11px;
-      max-width: 580px;
-      margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 11px; max-width: 580px; margin: 0 auto;
     }
-
     .room-card {
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 9px;
-      cursor: pointer;
-      transition: border-color .15s, background .15s, transform .1s;
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 20px 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 9px;
+      cursor: pointer; transition: border-color .15s, background .15s, transform .1s;
     }
     .room-card:active { transform: scale(.93); }
-    .room-card.selected {
-      border-color: var(--accent);
-      background: rgba(170,204,51,.1);
-    }
+    .room-card.selected { border-color: var(--accent); background: rgba(170,204,51,.1); }
     .room-card .room-icon  { font-size: 32px; line-height: 1; }
-    .room-card .room-label {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--text);
-      text-align: center;
-      line-height: 1.3;
-    }
+    .room-card .room-label { font-size: 12.5px; font-weight: 600; text-align: center; line-height: 1.3; }
 
-    /* ════════════════════════════════════════
-       ORDER SCREEN
-    ════════════════════════════════════════ */
+    /* ORDER SCREEN */
     #screen-order { background: var(--bg); }
-
     .order-topbar {
-      width: 100%;
-      padding: 22px 22px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
+      width: 100%; padding: 22px 22px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
     }
-
-    .order-topbar h1 {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -.3px;
-    }
-
+    .order-topbar h1 { font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
     .room-pill {
-      background: rgba(170,204,51,.13);
-      border: 1px solid rgba(170,204,51,.32);
-      color: var(--accent);
-      border-radius: 50px;
-      padding: 9px 16px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .15s;
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      background: rgba(170,204,51,.13); border: 1px solid rgba(170,204,51,.32);
+      color: var(--accent); border-radius: 50px; padding: 9px 16px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .room-pill:active { background: rgba(170,204,51,.22); }
-
     .order-body {
-      width: 100%;
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 22px 18px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      width: 100%; flex: 1; overflow-y: auto;
+      -webkit-overflow-scrolling: touch; padding: 22px 18px 16px;
+      display: flex; flex-direction: column; align-items: center;
     }
-
     .section-label {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--muted);
-      align-self: flex-start;
-      margin-bottom: 14px;
-      width: 100%;
-      max-width: 560px;
+      font-size: 12px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--muted);
+      align-self: flex-start; margin-bottom: 14px; width: 100%; max-width: 560px;
     }
-
     .drinks-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 11px;
-      width: 100%;
-      max-width: 560px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 11px; width: 100%; max-width: 560px;
     }
-
     .drink-btn {
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 16px;
-      cursor: pointer;
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 18px 16px; cursor: pointer;
       transition: border-color .15s, background .15s, transform .1s;
-      display: flex;
-      align-items: center;
-      gap: 13px;
-      -webkit-user-select: none;
-      user-select: none;
+      display: flex; align-items: center; gap: 13px;
+      position: relative;
     }
     .drink-btn:active { transform: scale(.96); }
-    .drink-btn.selected {
-      border-color: var(--accent);
-      background: rgba(170,204,51,.1);
-    }
+    .drink-btn.selected { border-color: var(--accent); background: rgba(170,204,51,.1); }
     .drink-btn .drink-emoji { font-size: 30px; line-height: 1; flex-shrink: 0; }
-    .drink-btn .drink-label { font-size: 15px; font-weight: 600; color: var(--text); }
-
-    .order-footer {
-      width: 100%;
-      padding: 14px 18px 44px;
-      flex-shrink: 0;
+    .drink-btn .drink-label { font-size: 15px; font-weight: 600; }
+    .qty-badge {
+      position: absolute; top: -8px; right: -8px;
+      background: var(--accent); color: #181A08;
+      font-size: 12px; font-weight: 800;
+      min-width: 24px; height: 24px; border-radius: 50px;
+      display: none; align-items: center; justify-content: center; padding: 0 5px;
     }
+    .order-footer { width: 100%; padding: 14px 18px 44px; flex-shrink: 0; }
 
-    /* ════════════════════════════════════════
-       CONFIRM SCREEN
-    ════════════════════════════════════════ */
-    #screen-confirm {
-      background: var(--bg);
-      justify-content: center;
-      padding: 40px 28px;
-    }
-
+    /* CONFIRM */
+    #screen-confirm { background: var(--bg); justify-content: center; padding: 40px 28px; }
     .confirm-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 16px; text-align: center;
       animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
     }
-
     .confirm-check {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #181A08;
-      font-size: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 8px;
+      width: 100px; height: 100px; border-radius: 50%;
+      background: var(--accent); color: #181A08; font-size: 48px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
     }
-
     .confirm-card h2   { font-size: 32px; font-weight: 800; }
     .confirm-card .sub { font-size: 17px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
 
-    /* ════════════════════════════════════════
-       READY OVERLAY
-    ════════════════════════════════════════ */
+    /* READY OVERLAY */
     #ready-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.78);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 28px;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.78); z-index: 100;
+      align-items: center; justify-content: center; padding: 28px;
     }
     #ready-overlay.visible { display: flex; }
-
     .ready-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      padding: 52px 36px;
-      text-align: center;
-      width: 100%;
-      max-width: 380px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 28px; padding: 52px 36px; text-align: center;
+      width: 100%; max-width: 380px;
       animation: popIn .45s cubic-bezier(.34,1.56,.64,1);
     }
     .ready-emoji { font-size: 76px; display: block; margin-bottom: 20px; }
     .ready-card h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
     .ready-card p  { font-size: 17px; color: var(--muted); margin-bottom: 36px; }
 
-    /* ════════════════════════════════════════
-       CONNECTION DOT
-    ════════════════════════════════════════ */
+    /* CONNECTION DOT */
     #conn-dot {
-      position: fixed;
-      bottom: 18px;
-      right: 18px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #444;
-      transition: background .4s;
+      position: fixed; bottom: 18px; right: 18px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #444; transition: background .4s;
     }
     #conn-dot.ok  { background: var(--accent); }
     #conn-dot.err { background: #EF5350; }
@@ -376,7 +194,6 @@
 </head>
 <body>
 
-<!-- ── Welcome ─────────────────────────────────────────────────────────────── -->
 <div id="screen-welcome" class="screen active">
   <div class="welcome-top">
     <div class="brand-icon"><img src="/apple-touch-icon3.png" alt="Room Service"></div>
@@ -388,7 +205,6 @@
   </div>
 </div>
 
-<!-- ── Room selection ──────────────────────────────────────────────────────── -->
 <div id="screen-room" class="screen">
   <div class="screen-header">
     <button class="back-btn" id="room-back">←</button>
@@ -402,7 +218,6 @@
   </div>
 </div>
 
-<!-- ── Order ───────────────────────────────────────────────────────────────── -->
 <div id="screen-order" class="screen">
   <div class="order-topbar">
     <h1>Room Service</h1>
@@ -413,11 +228,10 @@
     <div class="drinks-grid" id="drinks-grid"></div>
   </div>
   <div class="order-footer">
-    <button id="order-btn" class="btn btn-accent" disabled>Place Order</button>
+    <button id="order-btn" class="btn btn-accent" disabled>Choose a drink</button>
   </div>
 </div>
 
-<!-- ── Confirm ─────────────────────────────────────────────────────────────── -->
 <div id="screen-confirm" class="screen">
   <div class="confirm-card">
     <div class="confirm-check">✓</div>
@@ -426,7 +240,6 @@
   </div>
 </div>
 
-<!-- ── Ready overlay ───────────────────────────────────────────────────────── -->
 <div id="ready-overlay">
   <div class="ready-card">
     <span class="ready-emoji">☕</span>
@@ -441,7 +254,7 @@
 <script>
 'use strict';
 
-const ROOMS = [
+const DEFAULT_ROOMS = [
   { id: 'master',   icon: '👑', label: 'Master Suite' },
   { id: 'room1',    icon: '🛏️', label: 'Room 1' },
   { id: 'room2',    icon: '🛏️', label: 'Room 2' },
@@ -453,11 +266,10 @@ const ROOMS = [
   { id: 'living',   icon: '🛋️', label: 'Living Room' },
   { id: 'gym',      icon: '🏋️', label: 'Gym' },
   { id: 'wellness', icon: '🧘', label: 'Wellness' },
-  { id: 'kitchen',  icon: '🍳', label: 'Kitchen' },
-  { id: 'pool',     icon: '🏊', label: 'Swimming Pool' },
+  { id: 'pool',     icon: '🏊', label: 'Pool' },
 ];
 
-const DRINKS = [
+const DEFAULT_DRINKS = [
   { id: 'espresso',   icon: '☕', label: 'Espresso' },
   { id: 'flat-white', icon: '☕', label: 'Flat White' },
   { id: 'cappuccino', icon: '🥛', label: 'Cappuccino' },
@@ -468,14 +280,16 @@ const DRINKS = [
   { id: 'oj',         icon: '🧃', label: 'Orange Juice' },
 ];
 
-// ── State ─────────────────────────────────────────────────────────────────────
+// State
 let myRoom         = localStorage.getItem('rs_room') || '';
-let selectedDrink  = null;
+let currentRooms   = DEFAULT_ROOMS;
+let currentDrinks  = DEFAULT_DRINKS;
+const drinkQty     = new Map(); // drinkId → qty (0, 1, 2)
 let pendingOrderId = null;
 let ws;
 let reconnectDelay = 1000;
 
-// ── DOM refs ──────────────────────────────────────────────────────────────────
+// DOM
 const screenWelcome = document.getElementById('screen-welcome');
 const screenRoom    = document.getElementById('screen-room');
 const screenOrder   = document.getElementById('screen-order');
@@ -494,71 +308,112 @@ function showScreen(el) {
   el.classList.add('active');
 }
 
-// ── Room grid ─────────────────────────────────────────────────────────────────
-ROOMS.forEach(r => {
-  const card = document.createElement('button');
-  card.className = 'room-card';
-  card.dataset.id = r.id;
-  card.innerHTML = `<span class="room-icon">${r.icon}</span><span class="room-label">${r.label}</span>`;
-  card.addEventListener('click', () => {
-    myRoom = r.label;
-    localStorage.setItem('rs_room', myRoom);
-    enterOrderScreen();
+// Build rooms grid
+function buildRoomsGrid(rooms) {
+  roomsGrid.innerHTML = '';
+  rooms.forEach(r => {
+    const card = document.createElement('button');
+    card.className = 'room-card';
+    card.innerHTML = `<span class="room-icon">${r.icon}</span><span class="room-label">${r.label}</span>`;
+    card.addEventListener('click', () => {
+      myRoom = r.label;
+      localStorage.setItem('rs_room', myRoom);
+      enterOrderScreen();
+    });
+    roomsGrid.appendChild(card);
   });
-  roomsGrid.appendChild(card);
-});
+}
 
-// ── Drink grid ────────────────────────────────────────────────────────────────
-DRINKS.forEach(d => {
-  const btn = document.createElement('button');
-  btn.className = 'drink-btn';
-  btn.dataset.id = d.id;
-  btn.innerHTML = `<span class="drink-emoji">${d.icon}</span><span class="drink-label">${d.label}</span>`;
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selectedDrink = d.label;
-    orderBtn.disabled = false;
+// Build drinks grid with multi-select + qty
+function buildDrinksGrid(drinks) {
+  drinksGrid.innerHTML = '';
+  drinkQty.clear();
+  drinks.forEach(d => {
+    drinkQty.set(d.id, 0);
+    const btn = document.createElement('button');
+    btn.className = 'drink-btn';
+    btn.dataset.id = d.id;
+    btn.innerHTML = `
+      <span class="drink-emoji">${d.icon}</span>
+      <span class="drink-label">${d.label}</span>
+      <span class="qty-badge"></span>
+    `;
+    const badge = btn.querySelector('.qty-badge');
+    btn.addEventListener('click', () => {
+      let qty = drinkQty.get(d.id) || 0;
+      qty = (qty + 1) % 3; // 0 → 1 → 2 → 0
+      drinkQty.set(d.id, qty);
+      if (qty === 0) {
+        btn.classList.remove('selected');
+        badge.style.display = 'none';
+      } else {
+        btn.classList.add('selected');
+        badge.textContent = qty === 1 ? '×1' : '×2';
+        badge.style.display = 'flex';
+      }
+      updateOrderBtn();
+    });
+    drinksGrid.appendChild(btn);
   });
-  drinksGrid.appendChild(btn);
-});
+}
 
-// ── Navigation ────────────────────────────────────────────────────────────────
+function updateOrderBtn() {
+  const total = [...drinkQty.values()].reduce((a, b) => a + b, 0);
+  orderBtn.disabled = total === 0 || !myRoom;
+  orderBtn.textContent = total > 0
+    ? `Order · ${total} drink${total > 1 ? 's' : ''}`
+    : 'Choose a drink';
+}
+
+function applyConfig(config) {
+  if (config.rooms  && config.rooms.length)  { currentRooms  = config.rooms;  buildRoomsGrid(currentRooms); }
+  if (config.drinks && config.drinks.length) { currentDrinks = config.drinks; buildDrinksGrid(currentDrinks); }
+}
+
+// Navigation
 document.getElementById('get-started').addEventListener('click', () => {
   if (myRoom) enterOrderScreen();
   else showScreen(screenRoom);
 });
-
 document.getElementById('room-back').addEventListener('click', () => {
   showScreen(myRoom ? screenOrder : screenWelcome);
 });
-
 roomPill.addEventListener('click', () => showScreen(screenRoom));
 
 function enterOrderScreen() {
   roomPill.textContent = `${myRoom} ▾`;
-  selectedDrink = null;
-  orderBtn.disabled = true;
-  document.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('selected'));
+  drinkQty.forEach((_, k) => drinkQty.set(k, 0));
+  document.querySelectorAll('.drink-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.querySelector('.qty-badge').style.display = 'none';
+  });
+  updateOrderBtn();
   showScreen(screenOrder);
 }
 
-// ── Order ─────────────────────────────────────────────────────────────────────
+// Order
 orderBtn.addEventListener('click', () => {
-  if (!selectedDrink || !myRoom) return;
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
-  ws.send(JSON.stringify({ type: 'order', name: myRoom, drink: selectedDrink }));
+  if (!myRoom || !ws || ws.readyState !== WebSocket.OPEN) return;
+  const items = [];
+  for (const [id, qty] of drinkQty.entries()) {
+    if (qty > 0) {
+      const d = currentDrinks.find(x => x.id === id);
+      if (d) items.push(qty > 1 ? `${d.label} ×${qty}` : d.label);
+    }
+  }
+  if (!items.length) return;
+  const drinkStr = items.join(', ');
+  ws.send(JSON.stringify({ type: 'order', name: myRoom, drink: drinkStr }));
   orderBtn.disabled = true;
 });
 
-// ── Ready overlay ─────────────────────────────────────────────────────────────
 document.getElementById('dismiss-ready').addEventListener('click', () => {
   readyOverlay.classList.remove('visible');
   pendingOrderId = null;
   enterOrderScreen();
 });
 
-// ── WebSocket ─────────────────────────────────────────────────────────────────
+// WebSocket
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
   ws = new WebSocket(`${proto}//${location.host}`);
@@ -573,15 +428,25 @@ function connect() {
     let msg;
     try { msg = JSON.parse(data); } catch { return; }
 
+    if (msg.type === 'config') {
+      applyConfig(msg.config);
+      return;
+    }
     if (msg.type === 'order_confirmed') {
       pendingOrderId = msg.orderId;
-      confirmText.textContent = `${selectedDrink} → ${myRoom}`;
+      const items = [];
+      for (const [id, qty] of drinkQty.entries()) {
+        if (qty > 0) {
+          const d = currentDrinks.find(x => x.id === id);
+          if (d) items.push(qty > 1 ? `${d.label} ×${qty}` : d.label);
+        }
+      }
+      confirmText.textContent = `${items.join(', ')} → ${myRoom}`;
       showScreen(screenConfirm);
       setTimeout(() => {
         if (screenConfirm.classList.contains('active')) enterOrderScreen();
       }, 4000);
     }
-
     if (msg.type === 'order_ready' && msg.orderId === pendingOrderId) {
       readyOverlay.classList.add('visible');
     }
@@ -596,7 +461,9 @@ function connect() {
   ws.onerror = () => ws.close();
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// Init
+buildRoomsGrid(currentRooms);
+buildDrinksGrid(currentDrinks);
 connect();
 </script>
 </body>
