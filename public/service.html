@@ -3,69 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Service – Café</title>
+  <title>Room Service — Dashboard</title>
+  <link rel="apple-touch-icon" href="/apple-touch-icon3.png">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1a0d;
+      --card:    #1a2e1a;
+      --card2:   #213821;
+      --border:  #2d4f2d;
+      --accent:  #3db85a;
+      --text:    #d4f0d4;
+      --muted:   #7fa87f;
+      --danger:  #e07070;
+    }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-      background: #0d1a0d;
+      background: var(--bg);
       min-height: 100dvh;
-      padding: 2rem;
-      color: #d4f0d4;
+      color: var(--text);
     }
 
+    /* ── Header ── */
     header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2rem;
+      gap: 0.6rem;
+      padding: 1.2rem 1.5rem 0;
     }
-
-    header h1 {
-      font-size: clamp(1.5rem, 4vw, 2rem);
-      font-weight: 300;
-      letter-spacing: 0.04em;
-    }
-
+    header h1 { font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 300; flex: 1; }
     #dot {
-      width: 12px; height: 12px;
+      width: 11px; height: 11px;
       border-radius: 50%;
       background: #555;
       transition: background 0.3s;
     }
-    #dot.connected { background: #6bcf7f; }
+    #dot.on { background: var(--accent); }
 
-    #orders {
+    /* ── Tab nav ── */
+    nav {
       display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      gap: 0.4rem;
+      padding: 0.9rem 1.5rem 0;
     }
+    .tab-btn {
+      flex: 1;
+      padding: 0.55rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Views ── */
+    #view-orders, #view-settings {
+      padding: 1.2rem 1.5rem 3rem;
+    }
+
+    /* ── Orders ── */
+    #orders { display: flex; flex-direction: column; gap: 0.9rem; }
 
     .order-card {
-      background: #1a2e1a;
-      border: 1px solid #2d4f2d;
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 1.2rem 1.5rem;
+      padding: 1rem 1.2rem;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      align-items: flex-start;
       gap: 1rem;
-      animation: slideIn 0.3s ease;
+      animation: slideIn 0.28s ease;
     }
-
     @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-12px); }
+      from { opacity: 0; transform: translateY(-10px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     .order-info { flex: 1; }
-    .order-from { font-size: 1.3rem; font-weight: 600; }
-    .order-time { font-size: 0.95rem; color: #7fa87f; margin-top: 0.2rem; }
-
+    .order-room { font-size: 1.25rem; font-weight: 700; }
+    .order-items { margin-top: 0.3rem; font-size: 0.95rem; color: var(--muted); }
+    .order-time  { font-size: 0.85rem; color: var(--muted); margin-top: 0.2rem; }
     .done-btn {
-      padding: 0.65rem 1.3rem;
-      font-size: 1rem;
+      padding: 0.6rem 1.1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       border: none;
       border-radius: 12px;
@@ -74,91 +104,457 @@
       cursor: pointer;
       white-space: nowrap;
       -webkit-tap-highlight-color: transparent;
-      transition: transform 0.1s, opacity 0.2s;
+      transition: transform 0.1s;
     }
-    .done-btn:active { transform: scale(0.95); }
+    .done-btn:active { transform: scale(0.94); }
 
     #empty {
       text-align: center;
       color: #4a6b4a;
-      font-size: 1.1rem;
-      margin-top: 4rem;
+      font-size: 1rem;
+      margin-top: 3rem;
     }
+
+    /* ── Settings ── */
+    .settings-section { margin-bottom: 1.8rem; }
+    .settings-section h2 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.7rem;
+    }
+
+    /* Draggable list */
+    .drag-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .drag-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.55rem 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      cursor: default;
+      user-select: none;
+    }
+    .drag-item.dragging { opacity: 0.4; }
+    .drag-placeholder {
+      border: 2px dashed var(--accent);
+      border-radius: 12px;
+      background: transparent;
+    }
+    .drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.9;
+      background: var(--card2);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 0.55rem 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .handle {
+      color: var(--muted);
+      font-size: 1.1rem;
+      cursor: grab;
+      padding: 0 0.1rem;
+      touch-action: none;
+    }
+    .handle:active { cursor: grabbing; }
+
+    /* Emoji button */
+    .emoji-btn {
+      font-size: 1.3rem;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.15rem 0.35rem;
+      cursor: pointer;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Name input */
+    .item-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1rem;
+      padding: 0.1rem 0.2rem;
+      outline: none;
+    }
+    .item-input:focus { border-bottom-color: var(--accent); }
+    .item-input::placeholder { color: #4a6b4a; }
+
+    /* Delete button */
+    .del-btn {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 0.15rem;
+      -webkit-tap-highlight-color: transparent;
+      opacity: 0.7;
+    }
+    .del-btn:hover { opacity: 1; }
+
+    /* Add buttons */
+    .add-btn {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.55rem;
+      background: transparent;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Save button */
+    #save-btn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #3db85a, #256b37);
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(61,184,90,0.35);
+      transition: transform 0.12s, opacity 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #save-btn:active { transform: scale(0.97); }
+
+    #save-status {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--accent);
+      min-height: 1.3rem;
+      margin-top: 0.5rem;
+    }
+
+    /* ── Emoji picker ── */
+    #emoji-picker {
+      position: fixed;
+      z-index: 10000;
+      background: #1a2e1a;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.6rem;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.3rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    #emoji-picker.hidden { display: none; }
+    .ep-btn {
+      font-size: 1.4rem;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      padding: 0.25rem;
+      cursor: pointer;
+      transition: background 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ep-btn:hover { background: var(--card2); }
   </style>
 </head>
 <body>
   <header>
-    <h1>☕ Service café</h1>
+    <h1>☕ Room Service</h1>
     <div id="dot"></div>
   </header>
 
-  <div id="orders"></div>
-  <p id="empty">En attente de commandes…</p>
+  <nav>
+    <button class="tab-btn active" id="tab-orders" onclick="showTab('orders')">Commandes</button>
+    <button class="tab-btn"        id="tab-settings" onclick="showTab('settings')">Réglages</button>
+  </nav>
+
+  <!-- Orders view -->
+  <div id="view-orders">
+    <div id="orders"></div>
+    <p id="empty">En attente de commandes…</p>
+  </div>
+
+  <!-- Settings view -->
+  <div id="view-settings" style="display:none">
+    <div class="settings-section">
+      <h2>Pièces / Tables</h2>
+      <ul class="drag-list" id="rooms-list"></ul>
+      <button class="add-btn" id="add-room-btn">+ Ajouter une pièce</button>
+    </div>
+    <div class="settings-section">
+      <h2>Boissons</h2>
+      <ul class="drag-list" id="drinks-list"></ul>
+      <button class="add-btn" id="add-drink-btn">+ Ajouter une boisson</button>
+    </div>
+    <button id="save-btn">Enregistrer et diffuser</button>
+    <p id="save-status"></p>
+  </div>
+
+  <!-- Emoji picker -->
+  <div id="emoji-picker" class="hidden"></div>
 
   <script>
-    const ordersEl = document.getElementById('orders');
-    const emptyEl  = document.getElementById('empty');
-    const dot      = document.getElementById('dot');
+  'use strict';
 
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${proto}://${location.host}`);
+  /* ── WebSocket ── */
+  const dot = document.getElementById('dot');
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const ws = new WebSocket(`${proto}://${location.host}`);
+  let orderCounter = 0;
 
-    let counter = 0;
+  ws.addEventListener('open', () => {
+    dot.className = 'on';
+    ws.send(JSON.stringify({ type: 'register', role: 'service' }));
+  });
+  ws.addEventListener('close', () => { dot.className = ''; });
+  ws.addEventListener('message', e => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'order')  addOrder(msg);
+    if (msg.type === 'config') applyConfig(msg);
+  });
 
-    ws.addEventListener('open', () => {
-      dot.className = 'connected';
-      ws.send(JSON.stringify({ type: 'register', role: 'service' }));
+  /* ── Tab navigation ── */
+  function showTab(tab) {
+    document.getElementById('view-orders').style.display   = tab === 'orders'   ? '' : 'none';
+    document.getElementById('view-settings').style.display = tab === 'settings' ? '' : 'none';
+    document.getElementById('tab-orders').classList.toggle('active',   tab === 'orders');
+    document.getElementById('tab-settings').classList.toggle('active', tab === 'settings');
+  }
+
+  /* ── Orders ── */
+  const ordersEl = document.getElementById('orders');
+  const emptyEl  = document.getElementById('empty');
+
+  function addOrder(msg) {
+    const id = ++orderCounter;
+    emptyEl.style.display = 'none';
+
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 130].forEach(delay => {
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.3, ctx.currentTime + delay / 1000);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay / 1000 + 0.3);
+        osc.start(ctx.currentTime + delay / 1000);
+        osc.stop(ctx.currentTime + delay / 1000 + 0.35);
+      });
+    } catch {}
+
+    const itemsHtml = (msg.items || [])
+      .map(it => `${it.emoji} ${esc(it.name)}${it.qty > 1 ? ' ×' + it.qty : ''}`)
+      .join(' &nbsp;·&nbsp; ');
+
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.id = `oc-${id}`;
+    card.innerHTML = `
+      <div class="order-info">
+        <div class="order-room">🏠 ${esc(msg.room || '?')}</div>
+        <div class="order-items">${itemsHtml}</div>
+        <div class="order-time">${msg.time}</div>
+      </div>
+      <button class="done-btn" onclick="markDone(${id})">Prêt ✓</button>`;
+    ordersEl.prepend(card);
+  }
+
+  function markDone(id) {
+    ws.send(JSON.stringify({ type: 'done', orderId: id }));
+    const card = document.getElementById(`oc-${id}`);
+    if (card) card.remove();
+    if (!ordersEl.children.length) emptyEl.style.display = '';
+  }
+
+  /* ── Settings config ── */
+  const roomsList  = document.getElementById('rooms-list');
+  const drinksList = document.getElementById('drinks-list');
+
+  function applyConfig(cfg) {
+    roomsList.innerHTML = '';
+    drinksList.innerHTML = '';
+    (cfg.rooms  || []).forEach(r       => addRoomItem(r));
+    (cfg.drinks || []).forEach(d       => addDrinkItem(d.emoji, d.name));
+  }
+
+  function addRoomItem(name = '') {
+    const li = document.createElement('li');
+    li.className = 'drag-item';
+    li.innerHTML = `
+      <span class="handle">⠿</span>
+      <input class="item-input" type="text" value="${esc(name)}" placeholder="Nom de la pièce" maxlength="20">
+      <button class="del-btn" title="Supprimer">−</button>`;
+    li.querySelector('.del-btn').addEventListener('click', () => li.remove());
+    makeDraggable(li, roomsList);
+    roomsList.appendChild(li);
+    if (!name) li.querySelector('.item-input').focus();
+  }
+
+  function addDrinkItem(emoji = '☕', name = '') {
+    const li = document.createElement('li');
+    li.className = 'drag-item';
+    li.innerHTML = `
+      <span class="handle">⠿</span>
+      <button class="emoji-btn">${emoji}</button>
+      <input class="item-input" type="text" value="${esc(name)}" placeholder="Nom de la boisson" maxlength="30">
+      <button class="del-btn" title="Supprimer">−</button>`;
+    li.querySelector('.del-btn').addEventListener('click', () => li.remove());
+    li.querySelector('.emoji-btn').addEventListener('click', e => openEmojiPicker(e.currentTarget));
+    makeDraggable(li, drinksList);
+    drinksList.appendChild(li);
+    if (!name) li.querySelector('.item-input').focus();
+  }
+
+  document.getElementById('add-room-btn').addEventListener('click', () => addRoomItem());
+  document.getElementById('add-drink-btn').addEventListener('click', () => addDrinkItem('☕'));
+
+  /* ── Save & broadcast ── */
+  document.getElementById('save-btn').addEventListener('click', () => {
+    const rooms = [...roomsList.querySelectorAll('.item-input')]
+      .map(i => i.value.trim()).filter(Boolean);
+    const drinks = [...drinksList.querySelectorAll('.drag-item')].map(li => ({
+      emoji: li.querySelector('.emoji-btn').textContent,
+      name:  li.querySelector('.item-input').value.trim(),
+    })).filter(d => d.name);
+
+    ws.send(JSON.stringify({ type: 'update_config', rooms, drinks }));
+
+    const ss = document.getElementById('save-status');
+    ss.textContent = 'Diffusé ✓';
+    setTimeout(() => { ss.textContent = ''; }, 2000);
+  });
+
+  /* ── Emoji picker ── */
+  const EMOJIS = ['☕','🍵','🧃','💧','🧋','🍺','🍷','🥤','🫖','🍶','🥛','🍹','🍸','🫗','🧊','🍫','🧁','🥐','🍞','🥗'];
+  const picker = document.getElementById('emoji-picker');
+  let pickerTarget = null;
+
+  EMOJIS.forEach(em => {
+    const b = document.createElement('button');
+    b.className = 'ep-btn';
+    b.textContent = em;
+    b.addEventListener('click', () => {
+      if (pickerTarget) pickerTarget.textContent = em;
+      picker.classList.add('hidden');
+      pickerTarget = null;
     });
+    picker.appendChild(b);
+  });
 
-    ws.addEventListener('close', () => { dot.className = ''; });
+  function openEmojiPicker(btn) {
+    pickerTarget = btn;
+    const rect = btn.getBoundingClientRect();
+    picker.classList.remove('hidden');
+    // Position below the button, keep within viewport
+    let top  = rect.bottom + 6;
+    let left = rect.left;
+    const pw = picker.offsetWidth  || 200;
+    const ph = picker.offsetHeight || 160;
+    if (left + pw > window.innerWidth - 8)  left = window.innerWidth - pw - 8;
+    if (top  + ph > window.innerHeight - 8) top  = rect.top - ph - 6;
+    picker.style.top  = top  + 'px';
+    picker.style.left = left + 'px';
+  }
 
-    ws.addEventListener('message', (e) => {
-      const msg = JSON.parse(e.data);
-      if (msg.type === 'order') addOrder(msg);
-    });
+  document.addEventListener('click', e => {
+    if (!picker.classList.contains('hidden') &&
+        !picker.contains(e.target) &&
+        !e.target.classList.contains('emoji-btn')) {
+      picker.classList.add('hidden');
+      pickerTarget = null;
+    }
+  });
 
-    function addOrder(msg) {
-      const id = ++counter;
-      emptyEl.style.display = 'none';
+  /* ── Drag & drop (mouse + touch) ── */
+  function makeDraggable(li, list) {
+    const handle = li.querySelector('.handle');
 
-      // Play a subtle beep to alert the barista
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        [0, 120].forEach((delay) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain); gain.connect(ctx.destination);
-          osc.frequency.value = 880;
-          gain.gain.setValueAtTime(0.3, ctx.currentTime + delay / 1000);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay / 1000 + 0.3);
-          osc.start(ctx.currentTime + delay / 1000);
-          osc.stop(ctx.currentTime + delay / 1000 + 0.3);
-        });
-      } catch {}
+    handle.addEventListener('mousedown',  e => startDrag(e, li, list), { passive: false });
+    handle.addEventListener('touchstart', e => startDrag(e, li, list), { passive: false });
+  }
 
-      const card = document.createElement('div');
-      card.className = 'order-card';
-      card.id = `order-${id}`;
-      card.innerHTML = `
-        <div class="order-info">
-          <div class="order-from">☕ ${escHtml(msg.from)}</div>
-          <div class="order-time">${msg.time}</div>
-        </div>
-        <button class="done-btn" onclick="markDone(${id})">Prêt ✓</button>
-      `;
-      ordersEl.prepend(card);
+  function startDrag(e, item, list) {
+    e.preventDefault();
+    const isTouch = e.touches != null;
+    const pos0 = getPos(e);
+
+    // ghost
+    const ghost = item.cloneNode(true);
+    ghost.className = 'drag-ghost';
+    ghost.style.width = item.offsetWidth + 'px';
+    document.body.appendChild(ghost);
+
+    // placeholder
+    const ph = document.createElement('li');
+    ph.className = 'drag-placeholder';
+    ph.style.height = item.offsetHeight + 'px';
+    list.insertBefore(ph, item);
+    item.classList.add('dragging');
+
+    const rect0 = item.getBoundingClientRect();
+    ghost.style.left = rect0.left + 'px';
+    ghost.style.top  = rect0.top  + 'px';
+
+    function onMove(e) {
+      e.preventDefault();
+      const pos = getPos(e);
+      ghost.style.top = (rect0.top + pos.y - pos0.y) + 'px';
+
+      // find insertion point
+      ghost.style.visibility = 'hidden';
+      const el = document.elementFromPoint(pos.x, pos.y);
+      ghost.style.visibility = '';
+      const target = el && el.closest('li:not(.drag-placeholder):not(.drag-ghost)');
+      if (target && target.parentNode === list && target !== item) {
+        const mid = target.getBoundingClientRect().top + target.offsetHeight / 2;
+        list.insertBefore(ph, pos.y < mid ? target : target.nextSibling);
+      }
     }
 
-    function markDone(id) {
-      ws.send(JSON.stringify({ type: 'done', orderId: id }));
-      const card = document.getElementById(`order-${id}`);
-      if (card) card.remove();
-      if (!ordersEl.children.length) emptyEl.style.display = '';
+    function endDrag() {
+      item.classList.remove('dragging');
+      list.insertBefore(item, ph);
+      ph.remove();
+      ghost.remove();
+      document.removeEventListener(isTouch ? 'touchmove' : 'mousemove', onMove);
+      document.removeEventListener(isTouch ? 'touchend'  : 'mouseup',   endDrag);
     }
 
-    function escHtml(s) {
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
+    document.addEventListener(isTouch ? 'touchmove' : 'mousemove', onMove, { passive: false });
+    document.addEventListener(isTouch ? 'touchend'  : 'mouseup',   endDrag);
+  }
+
+  function getPos(e) {
+    const t = e.touches?.[0] || e.changedTouches?.[0] || e;
+    return { x: t.clientX, y: t.clientY };
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
   </script>
 </body>
 </html>

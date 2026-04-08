@@ -3,47 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Café</title>
+  <title>Room Service</title>
+  <link rel="apple-touch-icon" href="/apple-touch-icon3.png">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #1a0a00;
+      --card:    #2d1200;
+      --border:  #6b3a1f;
+      --accent:  #c47c2b;
+      --text:    #f5deb3;
+      --muted:   #a07850;
+      --success: #6bcf7f;
+      --error:   #e07070;
+      --waiting: #f0c060;
+    }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-      background: #1a0a00;
+      background: var(--bg);
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 2rem;
-      padding: 2rem;
+      padding: 1.8rem 1rem 3rem;
+      gap: 1.6rem;
+      color: var(--text);
     }
 
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
     h1 {
-      color: #f5deb3;
-      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-size: clamp(1.5rem, 5vw, 2.2rem);
       font-weight: 300;
       letter-spacing: 0.05em;
     }
-
-    #name-input {
-      font-size: 1.2rem;
-      padding: 0.7rem 1.2rem;
-      border-radius: 12px;
-      border: 2px solid #6b3a1f;
-      background: #2d1200;
-      color: #f5deb3;
-      text-align: center;
-      width: min(320px, 90vw);
-      outline: none;
+    #dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #555;
+      transition: background 0.3s;
     }
-    #name-input::placeholder { color: #8b6040; }
-    #name-input:focus { border-color: #c47c2b; }
+    #dot.on { background: var(--success); }
 
+    section { width: min(400px, 100%); }
+
+    section h2 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.65rem;
+    }
+
+    /* ── Rooms ── */
+    #rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+      gap: 0.55rem;
+    }
+    .room-btn {
+      padding: 0.65rem 0.4rem;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.12s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .room-btn.sel {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .room-btn:active { transform: scale(0.93); }
+
+    /* ── Drinks ── */
+    #drinks-list { display: flex; flex-direction: column; gap: 0.55rem; }
+
+    .drink-row {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.65rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .d-emoji { font-size: 1.45rem; line-height: 1; }
+    .d-name  { flex: 1; font-size: 1rem; }
+
+    .counter { display: flex; align-items: center; gap: 0.45rem; }
+    .c-btn {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: #3d2000;
+      color: var(--text);
+      font-size: 1.25rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.1s;
+    }
+    .c-btn:active { background: var(--accent); }
+    .c-val {
+      min-width: 2ch;
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    /* ── Order button ── */
     #order-btn {
-      width: min(320px, 90vw);
-      padding: 1.4rem 2rem;
-      font-size: clamp(1.3rem, 4vw, 1.7rem);
+      width: min(400px, 100%);
+      padding: 1.2rem 2rem;
+      font-size: clamp(1.15rem, 4vw, 1.5rem);
       font-weight: 600;
       border: none;
       border-radius: 20px;
@@ -56,83 +141,149 @@
       -webkit-tap-highlight-color: transparent;
     }
     #order-btn:active { transform: scale(0.96); box-shadow: 0 3px 10px rgba(196,124,43,0.3); }
-    #order-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    #order-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     #status {
-      font-size: 1.1rem;
-      color: #a07850;
-      min-height: 1.6rem;
+      font-size: 1rem;
+      color: var(--muted);
+      min-height: 1.4rem;
       text-align: center;
-      transition: color 0.3s;
     }
-    #status.success { color: #6bcf7f; }
-    #status.error   { color: #e07070; }
-    #status.waiting { color: #f0c060; }
-
-    #dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: #555;
-      display: inline-block;
-      margin-right: 6px;
-      vertical-align: middle;
-      transition: background 0.3s;
-    }
-    #dot.connected { background: #6bcf7f; }
+    #status.ok  { color: var(--success); }
+    #status.err { color: var(--error);   }
+    #status.w   { color: var(--waiting); }
   </style>
 </head>
 <body>
-  <h1>☕ Commander un café</h1>
+  <header>
+    <h1>☕ Room Service</h1>
+    <div id="dot"></div>
+  </header>
 
-  <input id="name-input" type="text" placeholder="Votre prénom (optionnel)" maxlength="30">
+  <section>
+    <h2>Chambre / Table</h2>
+    <div id="rooms-grid"></div>
+  </section>
 
-  <button id="order-btn">Commander un café</button>
+  <section>
+    <h2>Boissons</h2>
+    <div id="drinks-list"></div>
+  </section>
 
-  <p id="status"><span id="dot"></span>Connexion…</p>
+  <button id="order-btn" disabled>Commander</button>
+  <p id="status">Connexion…</p>
 
   <script>
-    const btn = document.getElementById('order-btn');
-    const status = document.getElementById('status');
-    const dot = document.getElementById('dot');
-    const nameInput = document.getElementById('name-input');
+    const roomsGrid  = document.getElementById('rooms-grid');
+    const drinksList = document.getElementById('drinks-list');
+    const orderBtn   = document.getElementById('order-btn');
+    const statusEl   = document.getElementById('status');
+    const dot        = document.getElementById('dot');
+
+    let selectedRoom = null;
+    let quantities   = {};
+    let drinks       = [];
 
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     const ws = new WebSocket(`${proto}://${location.host}`);
 
     ws.addEventListener('open', () => {
-      dot.className = 'connected';
+      dot.className = 'on';
       setStatus('Prêt à commander', '');
-      btn.disabled = false;
     });
-
     ws.addEventListener('close', () => {
       dot.className = '';
-      setStatus('Déconnecté – rechargez la page', 'error');
-      btn.disabled = true;
+      setStatus('Déconnecté – rechargez la page', 'err');
+      orderBtn.disabled = true;
     });
-
     ws.addEventListener('message', (e) => {
       const msg = JSON.parse(e.data);
+      if (msg.type === 'config') applyConfig(msg);
       if (msg.type === 'done') {
-        setStatus('Votre café est en préparation !', 'success');
-        btn.disabled = false;
+        setStatus('Votre commande est en préparation !', 'ok');
+        resetQty();
       }
     });
 
-    btn.disabled = true;
+    function applyConfig(cfg) {
+      // Rooms
+      selectedRoom = null;
+      roomsGrid.innerHTML = '';
+      (cfg.rooms || []).forEach(room => {
+        const b = document.createElement('button');
+        b.className = 'room-btn';
+        b.textContent = room;
+        b.addEventListener('click', () => {
+          roomsGrid.querySelectorAll('.room-btn').forEach(x => x.classList.remove('sel'));
+          b.classList.add('sel');
+          selectedRoom = room;
+          updateBtn();
+        });
+        roomsGrid.appendChild(b);
+      });
 
-    btn.addEventListener('click', () => {
-      if (ws.readyState !== WebSocket.OPEN) return;
-      const from = nameInput.value.trim() || 'Anonyme';
-      ws.send(JSON.stringify({ type: 'order', from }));
-      btn.disabled = true;
-      setStatus('Commande envoyée…', 'waiting');
+      // Drinks
+      drinks = cfg.drinks || [];
+      quantities = {};
+      drinksList.innerHTML = '';
+      drinks.forEach((d, i) => {
+        quantities[i] = 0;
+        const row = document.createElement('div');
+        row.className = 'drink-row';
+        row.innerHTML = `
+          <span class="d-emoji">${d.emoji}</span>
+          <span class="d-name">${esc(d.name)}</span>
+          <div class="counter">
+            <button class="c-btn" data-i="${i}" data-d="-1">−</button>
+            <span class="c-val" id="q${i}">0</span>
+            <button class="c-btn" data-i="${i}" data-d="1">+</button>
+          </div>`;
+        drinksList.appendChild(row);
+      });
+      updateBtn();
+    }
+
+    drinksList.addEventListener('click', e => {
+      const btn = e.target.closest('.c-btn');
+      if (!btn) return;
+      const i = +btn.dataset.i, d = +btn.dataset.d;
+      quantities[i] = Math.max(0, Math.min(99, (quantities[i] || 0) + d));
+      document.getElementById(`q${i}`).textContent = quantities[i];
+      updateBtn();
     });
 
+    function updateBtn() {
+      const hasRoom  = !!selectedRoom;
+      const hasItem  = Object.values(quantities).some(v => v > 0);
+      orderBtn.disabled = !(hasRoom && hasItem);
+    }
+
+    orderBtn.addEventListener('click', () => {
+      if (ws.readyState !== WebSocket.OPEN) return;
+      const items = drinks
+        .map((d, i) => quantities[i] > 0 ? { name: d.name, emoji: d.emoji, qty: quantities[i] } : null)
+        .filter(Boolean);
+      ws.send(JSON.stringify({ type: 'order', room: selectedRoom, items }));
+      orderBtn.disabled = true;
+      setStatus('Commande envoyée…', 'w');
+    });
+
+    function resetQty() {
+      drinks.forEach((_, i) => {
+        quantities[i] = 0;
+        const el = document.getElementById(`q${i}`);
+        if (el) el.textContent = '0';
+      });
+      updateBtn();
+    }
+
     function setStatus(text, cls) {
-      const dotHtml = `<span id="dot" class="${dot.className}"></span>`;
-      status.innerHTML = `${dotHtml}${text}`;
-      status.className = cls;
+      statusEl.textContent = text;
+      statusEl.className = cls;
+    }
+
+    function esc(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
   </script>
 </body>
