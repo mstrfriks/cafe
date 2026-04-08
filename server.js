@@ -11,7 +11,6 @@ const wss    = new WebSocket.Server({ server });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Keep-alive : empêche Render free tier de s'endormir
 const RENDER_URL = process.env.RENDER_EXTERNAL_URL || '';
 if (RENDER_URL) {
   setInterval(() => { fetch(RENDER_URL).catch(() => {}); }, 10 * 60 * 1000);
@@ -21,11 +20,11 @@ const orders  = [];
 let   nextId  = 1;
 const sockets = new Set();
 
-// ── ntfy push notification ────────────────────────────────────────────────────
-// Set NTFY_TOPIC env var on Render.com (e.g. "cafe-maison-abc123")
 const NTFY_TOPIC = process.env.NTFY_TOPIC || '';
+console.log('NTFY_TOPIC at startup:', NTFY_TOPIC || '(not set)');
 
 function notifyService(order) {
+  console.log('notifyService called, NTFY_TOPIC:', NTFY_TOPIC || '(not set)');
   if (!NTFY_TOPIC) return;
   fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
     method:  'POST',
@@ -35,7 +34,9 @@ function notifyService(order) {
       'Tags':     'coffee',
     },
     body: order.drink,
-  }).catch(() => {}); // silent — don't crash server if ntfy is unreachable
+  })
+  .then(r => console.log('ntfy response:', r.status))
+  .catch(e => console.error('ntfy error:', e.message));
 }
 
 wss.on('connection', (ws) => {
@@ -46,17 +47,14 @@ wss.on('connection', (ws) => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
 
-    // ── register ──────────────────────────────────────────────────────────────
     if (msg.type === 'register') {
       ws.role = msg.role;
       if (msg.role === 'service') {
-        // Send current pending orders so the dashboard is accurate after reload
         send(ws, { type: 'orders', orders: orders.filter(o => o.status === 'pending') });
       }
       return;
     }
 
-    // ── new order ─────────────────────────────────────────────────────────────
     if (msg.type === 'order') {
       const name  = String(msg.name  || '').trim().slice(0, 50);
       const drink = String(msg.drink || '').trim().slice(0, 50);
@@ -64,7 +62,6 @@ wss.on('connection', (ws) => {
 
       const order = { id: nextId++, name, drink, at: Date.now(), status: 'pending' };
       orders.push(order);
-      // Keep memory bounded
       if (orders.length > 500) orders.splice(0, orders.length - 500);
 
       broadcast('service', { type: 'new_order', order });
@@ -73,7 +70,6 @@ wss.on('connection', (ws) => {
       return;
     }
 
-    // ── mark ready ────────────────────────────────────────────────────────────
     if (msg.type === 'ready') {
       const order = orders.find(o => o.id === msg.orderId && o.status === 'pending');
       if (!order) return;
