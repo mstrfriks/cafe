@@ -21,6 +21,7 @@ let   nextId  = 1;
 const sockets = new Set();
 
 const NTFY_TOPIC = process.env.NTFY_TOPIC || '';
+const APP_URL    = process.env.RENDER_EXTERNAL_URL || '';
 console.log('NTFY_TOPIC at startup:', NTFY_TOPIC || '(not set)');
 
 function notifyService(order) {
@@ -32,6 +33,7 @@ function notifyService(order) {
       'Title':    `Cafe - ${order.name}`,
       'Priority': 'high',
       'Tags':     'coffee',
+      'Actions':  `view, Ouvrir le dashboard, ${APP_URL}/service`,
     },
     body: order.drink,
   })
