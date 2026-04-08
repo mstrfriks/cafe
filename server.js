@@ -20,6 +20,7 @@ if (RENDER_URL) {
 const orders  = [];
 let   nextId  = 1;
 const sockets = new Set();
+let   sharedConfig = null; // pushed by service, forwarded to clients
 
 const NTFY_TOPIC = process.env.NTFY_TOPIC || '';
 const APP_URL    = process.env.RENDER_EXTERNAL_URL || '';
@@ -55,12 +56,22 @@ wss.on('connection', (ws) => {
       if (msg.role === 'service') {
         send(ws, { type: 'orders', orders: orders.filter(o => o.status === 'pending') });
       }
+      if (msg.role === 'client' && sharedConfig) {
+        send(ws, { type: 'config', config: sharedConfig });
+      }
+      return;
+    }
+
+    if (msg.type === 'update_config') {
+      if (ws.role !== 'service') return;
+      sharedConfig = msg.config;
+      broadcast('client', { type: 'config', config: sharedConfig });
       return;
     }
 
     if (msg.type === 'order') {
       const name  = String(msg.name  || '').trim().slice(0, 50);
-      const drink = String(msg.drink || '').trim().slice(0, 50);
+      const drink = String(msg.drink || '').trim().slice(0, 200);
       if (!name || !drink) return;
 
       const order = { id: nextId++, name, drink, at: Date.now(), status: 'pending' };
