@@ -20,14 +20,13 @@ if (RENDER_URL) {
 const orders  = [];
 let   nextId  = 1;
 const sockets = new Set();
-let   sharedConfig = null; // pushed by service, forwarded to clients
+let   sharedConfig = null;
 
 const NTFY_TOPIC = process.env.NTFY_TOPIC || '';
 const APP_URL    = process.env.RENDER_EXTERNAL_URL || '';
 console.log('NTFY_TOPIC at startup:', NTFY_TOPIC || '(not set)');
 
 function notifyService(order) {
-  console.log('notifyService called, NTFY_TOPIC:', NTFY_TOPIC || '(not set)');
   if (!NTFY_TOPIC) return;
   fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
     method:  'POST',
