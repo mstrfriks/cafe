@@ -68,6 +68,11 @@
     .del-btn { width:36px; height:36px; border-radius:50%; background:#3a1010; border:1.5px solid #7a2020; color:#ff6b6b; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:background .15s; line-height:1; }
     .del-btn:active { background:#7a2020; }
 
+    .drag-handle { cursor:grab; color:var(--muted); font-size:18px; padding:0 8px 0 2px; touch-action:none; user-select:none; flex-shrink:0; }
+    .drag-handle:active { cursor:grabbing; }
+    .settings-item.dragging { opacity:.2; }
+    .drag-placeholder { border:2px dashed var(--accent); border-radius:12px; background:rgba(170,204,51,.05); }
+
     /* Add form */
     .add-form { position:relative; display:flex; gap:8px; align-items:center; }
     .icon-input { width:56px; border-radius:10px; padding:13px 8px; font-size:20px; text-align:center; background:var(--card); border:1px solid var(--border); color:var(--text); -webkit-text-fill-color:var(--text); outline:none; -webkit-appearance:none; cursor:pointer; }
@@ -228,8 +233,8 @@ function renderSettingsRooms() {
   editRooms.forEach((r, i) => {
     const item = document.createElement('div');
     item.className = 'settings-item';
-    item.innerHTML = `<span class="settings-item-label">${r.icon} ${r.label}</span><button class="del-btn">−</button>`;
-    item.querySelector('.del-btn').addEventListener('click', () => { editRooms.splice(i,1); renderSettingsRooms(); });
+    item.dataset.index = i;
+    item.innerHTML = `<span class="drag-handle">⠿</span><span class="settings-item-label">${r.icon} ${r.label}</span><button class="del-btn" data-i="${i}">−</button>`;
     list.appendChild(item);
   });
 }
@@ -240,11 +245,96 @@ function renderSettingsDrinks() {
   editDrinks.forEach((d, i) => {
     const item = document.createElement('div');
     item.className = 'settings-item';
-    item.innerHTML = `<span class="settings-item-label">${d.icon} ${d.label}</span><button class="del-btn">−</button>`;
-    item.querySelector('.del-btn').addEventListener('click', () => { editDrinks.splice(i,1); renderSettingsDrinks(); });
+    item.dataset.index = i;
+    item.innerHTML = `<span class="drag-handle">⠿</span><span class="settings-item-label">${d.icon} ${d.label}</span><button class="del-btn" data-i="${i}">−</button>`;
     list.appendChild(item);
   });
 }
+
+document.getElementById('settings-rooms').addEventListener('click', e => {
+  const btn = e.target.closest('.del-btn'); if (!btn) return;
+  editRooms.splice(+btn.dataset.i, 1); renderSettingsRooms();
+});
+document.getElementById('settings-drinks').addEventListener('click', e => {
+  const btn = e.target.closest('.del-btn'); if (!btn) return;
+  editDrinks.splice(+btn.dataset.i, 1); renderSettingsDrinks();
+});
+
+function makeSortable(listEl, getArr) {
+  let src = null, ghost = null, ph = null, srcY = 0;
+  listEl.addEventListener('mousedown', start);
+  listEl.addEventListener('touchstart', start, { passive: false });
+
+  function start(e) {
+    if (!e.target.closest('.drag-handle')) return;
+    const item = e.target.closest('.settings-item'); if (!item) return;
+    e.preventDefault();
+    src = item;
+    const rect = item.getBoundingClientRect();
+    srcY = getY(e) - rect.top;
+
+    ph = document.createElement('div');
+    ph.className = 'drag-placeholder';
+    ph.style.height = rect.height + 'px';
+    item.after(ph);
+    item.classList.add('dragging');
+
+    ghost = item.cloneNode(true);
+    Object.assign(ghost.style, {
+      position:'fixed', left:rect.left+'px', top:rect.top+'px', width:rect.width+'px',
+      pointerEvents:'none', zIndex:'999', opacity:'0.92',
+      background:'var(--card)', border:'1.5px solid var(--accent)',
+      borderRadius:'12px', padding:'14px 16px',
+      display:'flex', alignItems:'center', gap:'12px',
+      boxShadow:'0 8px 24px rgba(0,0,0,.5)'
+    });
+    document.body.appendChild(ghost);
+
+    document.addEventListener('mousemove', move);
+    document.addEventListener('touchmove', move, { passive: false });
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchend', end);
+  }
+
+  function move(e) {
+    e.preventDefault();
+    const y = getY(e);
+    ghost.style.top = (y - srcY) + 'px';
+    ghost.style.visibility = 'hidden';
+    const hit = document.elementFromPoint(parseFloat(ghost.style.left) + 20, y);
+    ghost.style.visibility = '';
+    const target = hit?.closest('.settings-item:not(.dragging)');
+    if (target && target.parentNode === listEl) {
+      const mid = target.getBoundingClientRect().top + target.offsetHeight / 2;
+      listEl.insertBefore(ph, y < mid ? target : target.nextSibling);
+    }
+  }
+
+  function end() {
+    if (!src) return;
+    listEl.insertBefore(src, ph);
+    ph.remove(); ghost.remove();
+    src.classList.remove('dragging');
+    const arr = getArr();
+    const items = [...listEl.querySelectorAll('.settings-item')];
+    const newArr = items.map(el => arr[+el.dataset.index]);
+    arr.splice(0, arr.length, ...newArr);
+    items.forEach((el, i) => {
+      el.dataset.index = i;
+      const db = el.querySelector('.del-btn'); if (db) db.dataset.i = i;
+    });
+    src = ghost = ph = null;
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('touchmove', move);
+    document.removeEventListener('mouseup', end);
+    document.removeEventListener('touchend', end);
+  }
+
+  function getY(e) { return (e.touches?.[0] || e.changedTouches?.[0] || e).clientY; }
+}
+
+makeSortable(document.getElementById('settings-rooms'),  () => editRooms);
+makeSortable(document.getElementById('settings-drinks'), () => editDrinks);
 
 document.getElementById('settings-btn').addEventListener('click', () => {
   editRooms  = JSON.parse(JSON.stringify(config.rooms));
