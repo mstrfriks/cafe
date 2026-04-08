@@ -24,17 +24,16 @@ let   sharedConfig = null;
 
 const NTFY_TOPIC = process.env.NTFY_TOPIC || '';
 const APP_URL    = process.env.RENDER_EXTERNAL_URL || '';
-console.log('NTFY_TOPIC at startup:', NTFY_TOPIC || '(not set)');
 
 function notifyService(order) {
   if (!NTFY_TOPIC) return;
   fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
-    method:  'POST',
+    method: 'POST',
     headers: {
-      'Title':    `Cafe - ${order.name}`,
-      'Priority': 'high',
-      'Tags':     'coffee',
-      'Actions':  `view, Ouvrir le dashboard, ${APP_URL}/service`,
+      'Title':   `Cafe - ${order.name}`,
+      'Priority':'high',
+      'Tags':    'coffee',
+      'Actions': `view, Ouvrir le dashboard, ${APP_URL}/service`,
     },
     body: order.drink,
   })
@@ -65,6 +64,7 @@ wss.on('connection', (ws) => {
       if (ws.role !== 'service') return;
       sharedConfig = msg.config;
       broadcast('client', { type: 'config', config: sharedConfig });
+      console.log('Config updated and broadcast to clients');
       return;
     }
 
@@ -72,11 +72,9 @@ wss.on('connection', (ws) => {
       const name  = String(msg.name  || '').trim().slice(0, 50);
       const drink = String(msg.drink || '').trim().slice(0, 200);
       if (!name || !drink) return;
-
       const order = { id: nextId++, name, drink, at: Date.now(), status: 'pending' };
       orders.push(order);
       if (orders.length > 500) orders.splice(0, orders.length - 500);
-
       broadcast('service', { type: 'new_order', order });
       send(ws, { type: 'order_confirmed', orderId: order.id });
       notifyService(order);
