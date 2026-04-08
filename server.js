@@ -11,6 +11,12 @@ const wss    = new WebSocket.Server({ server });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Keep-alive : empêche Render free tier de s'endormir
+const RENDER_URL = process.env.RENDER_EXTERNAL_URL || '';
+if (RENDER_URL) {
+  setInterval(() => { fetch(RENDER_URL).catch(() => {}); }, 10 * 60 * 1000);
+}
+
 const orders  = [];
 let   nextId  = 1;
 const sockets = new Set();
