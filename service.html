@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Room Service — Dashboard</title>
+  <link rel="apple-touch-icon" href="/apple-touch-icon3.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0D0D0D;
+      --surface: #181818;
+      --card:    #202020;
+      --border:  #2E2E2E;
+      --accent:  #AACC33;
+      --text:    #FFFFFF;
+      --muted:   #737373;
+      --radius:  18px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left h1   { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
+    .header-left span { font-size: 14px; color: var(--muted); display: block; margin-top: 2px; }
+
+    .header-right { display: flex; align-items: center; gap: 14px; }
+
+    #badge {
+      background: var(--accent);
+      color: #181A08;
+      font-size: 15px;
+      font-weight: 800;
+      min-width: 34px;
+      height: 34px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+    }
+    #badge.bump { animation: bump .3s ease; }
+    @keyframes bump { 0%,100% { transform: scale(1); } 50% { transform: scale(1.5); } }
+
+    #conn-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #444;
+      transition: background .4s;
+    }
+    #conn-dot.ok  { background: var(--accent); }
+    #conn-dot.err { background: #EF5350; }
+
+    /* ── Notification banner ─────────────────────────────────────────────────── */
+    #notif-banner {
+      background: rgba(170,204,51,.1);
+      border-bottom: 1px solid rgba(170,204,51,.2);
+      padding: 14px 24px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      font-size: 15px;
+      color: var(--accent);
+    }
+    #notif-banner.visible { display: flex; }
+    #notif-banner button {
+      background: var(--accent);
+      color: #181A08;
+      border: none;
+      border-radius: 50px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Main ────────────────────────────────────────────────────────────────── */
+    main {
+      padding: 22px 20px 44px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* ── Empty state ─────────────────────────────────────────────────────────── */
+    #empty {
+      text-align: center;
+      padding: 90px 24px;
+      color: var(--muted);
+    }
+    #empty .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: .6; }
+    #empty p { font-size: 18px; }
+
+    /* ── Order list ──────────────────────────────────────────────────────────── */
+    #order-list { display: flex; flex-direction: column; gap: 13px; }
+
+    /* ── Order card ──────────────────────────────────────────────────────────── */
+    .order-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: slideIn .32s cubic-bezier(.25,.8,.25,1);
+      transition: opacity .28s, transform .28s;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-16px) scale(.97); }
+      to   { opacity: 1; transform: none; }
+    }
+    .order-card.removing {
+      opacity: 0;
+      transform: scale(.94);
+      pointer-events: none;
+    }
+
+    .drink-icon { font-size: 40px; line-height: 1; flex-shrink: 0; }
+
+    .order-info { flex: 1; min-width: 0; }
+
+    .order-room {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .order-drink {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .order-time {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .ready-btn {
+      background: var(--accent);
+      color: #181A08;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 22px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: transform .1s, opacity .15s;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .ready-btn:active { transform: scale(.92); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>🏨 Room Service</h1>
+    <span>Service Dashboard</span>
+  </div>
+  <div class="header-right">
+    <div id="badge">0</div>
+    <div id="conn-dot"></div>
+  </div>
+</header>
+
+<div id="notif-banner">
+  <span>🔔 Enable notifications to be alerted of new orders</span>
+  <button id="notif-btn">Enable</button>
+</div>
+
+<main>
+  <div id="empty">
+    <div class="empty-icon">🛎️</div>
+    <p>Waiting for orders…</p>
+  </div>
+  <div id="order-list"></div>
+</main>
+
+<script>
+'use strict';
+
+// ── Drink emoji map ───────────────────────────────────────────────────────────
+const DRINK_EMOJI = {
+  'Espresso':       '☕',
+  'Flat White':     '☕',
+  'Cappuccino':     '🥛',
+  'Black Tea':      '🍵',
+  'Green Tea':      '🍵',
+  'Hot Chocolate':  '🍫',
+  'Still Water':    '💧',
+  'Orange Juice':   '🧃',
+};
+function emojiFor(drink) { return DRINK_EMOJI[drink] || '☕'; }
+
+// ── Audio beep ────────────────────────────────────────────────────────────────
+let audioCtx = null;
+
+document.addEventListener('click', () => {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+});
+
+function playBeep() {
+  if (!audioCtx) return;
+  [{ freq: 880, delay: 0 }, { freq: 1100, delay: 220 }].forEach(({ freq, delay }) => {
+    setTimeout(() => {
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.45, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.55);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.55);
+    }, delay);
+  });
+}
+
+// ── Browser notifications ─────────────────────────────────────────────────────
+const notifBanner = document.getElementById('notif-banner');
+
+function checkNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') notifBanner.classList.add('visible');
+}
+
+document.getElementById('notif-btn').addEventListener('click', () => {
+  Notification.requestPermission().then(p => {
+    if (p !== 'default') notifBanner.classList.remove('visible');
+  });
+});
+
+function sendNotif(order) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  new Notification(`New order — ${order.name}`, {
+    body: order.drink,
+    tag:  `order-${order.id}`,
+  });
+}
+
+// ── DOM refs ──────────────────────────────────────────────────────────────────
+const badge     = document.getElementById('badge');
+const empty     = document.getElementById('empty');
+const orderList = document.getElementById('order-list');
+const connDot   = document.getElementById('conn-dot');
+
+// ── Order state ───────────────────────────────────────────────────────────────
+const ordersMap = new Map();
+
+function updateBadge() {
+  const n = ordersMap.size;
+  badge.textContent = n;
+  badge.classList.remove('bump');
+  void badge.offsetWidth;
+  badge.classList.add('bump');
+  empty.style.display = n === 0 ? '' : 'none';
+}
+
+function timeLabel(ts) {
+  const s = Math.round((Date.now() - ts) / 1000);
+  if (s < 60) return `${s}s ago`;
+  return `${Math.round(s / 60)}min ago`;
+}
+
+function addOrder(order) {
+  if (ordersMap.has(order.id)) return;
+
+  const card = document.createElement('div');
+  card.className = 'order-card';
+  card.innerHTML = `
+    <span class="drink-icon">${emojiFor(order.drink)}</span>
+    <div class="order-info">
+      <div class="order-room">${escHtml(order.name)}</div>
+      <div class="order-drink">${escHtml(order.drink)}</div>
+      <div class="order-time" data-ts="${order.at}">${timeLabel(order.at)}</div>
+    </div>
+    <button class="ready-btn">Ready ✓</button>
+  `;
+
+  card.querySelector('.ready-btn').addEventListener('click', () => markReady(order.id));
+  orderList.prepend(card);
+  ordersMap.set(order.id, card);
+  updateBadge();
+}
+
+function removeOrder(id) {
+  const card = ordersMap.get(id);
+  if (!card) return;
+  card.classList.add('removing');
+  setTimeout(() => { card.remove(); ordersMap.delete(id); updateBadge(); }, 280);
+}
+
+function markReady(id) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  ws.send(JSON.stringify({ type: 'ready', orderId: id }));
+}
+
+setInterval(() => {
+  document.querySelectorAll('.order-time[data-ts]').forEach(el => {
+    el.textContent = timeLabel(Number(el.dataset.ts));
+  });
+}, 10000);
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── WebSocket ─────────────────────────────────────────────────────────────────
+let ws;
+let reconnectDelay = 1000;
+
+function connect() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}`);
+
+  ws.onopen = () => {
+    reconnectDelay = 1000;
+    connDot.className = 'ok';
+    ws.send(JSON.stringify({ type: 'register', role: 'service' }));
+  };
+
+  ws.onmessage = ({ data }) => {
+    let msg;
+    try { msg = JSON.parse(data); } catch { return; }
+
+    if (msg.type === 'orders')       { msg.orders.forEach(addOrder); return; }
+    if (msg.type === 'new_order')    { addOrder(msg.order); playBeep(); sendNotif(msg.order); return; }
+    if (msg.type === 'order_removed') { removeOrder(msg.orderId); }
+  };
+
+  ws.onclose = () => {
+    connDot.className = 'err';
+    setTimeout(connect, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+checkNotifPermission();
+connect();
+</script>
+</body>
+</html>
