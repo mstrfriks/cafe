@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 class WebSocketManager: ObservableObject {
     @Published var isConnected = false
