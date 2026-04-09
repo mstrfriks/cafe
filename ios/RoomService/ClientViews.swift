@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Root
 
 struct ClientRootView: View {
-    @ObservedObject var ws: WebSocketManager
+    @ObservedObject var mp: MultipeerManager
     @State private var selectedRoom: Room? = nil
     @State private var screen: Screen = .rooms
     @State private var showReady = false
@@ -16,9 +16,9 @@ struct ClientRootView: View {
 
             switch screen {
             case .rooms:
-                RoomSelectionView(ws: ws) { room in
+                RoomSelectionView(mp: mp) { room in
                     selectedRoom = room
-                    ws.confirmedOrderId = nil
+                    mp.confirmedOrderId = nil
                     screen = .order
                 }
                 .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .leading)))
@@ -41,14 +41,14 @@ struct ClientRootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: screen)
-        .onChange(of: ws.readyOrderId) { id in if id != nil { showReady = true } }
+        .onChange(of: mp.readyOrderId) { id in if id != nil { showReady = true } }
     }
 }
 
 // MARK: - Room Selection
 
 struct RoomSelectionView: View {
-    @ObservedObject var ws: WebSocketManager
+    @ObservedObject var mp: MultipeerManager
     var onSelect: (Room) -> Void
 
     let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
@@ -62,7 +62,7 @@ struct RoomSelectionView: View {
                     .foregroundColor(.white)
                 Spacer()
                 Circle()
-                    .fill(ws.isConnected ? accent : .gray)
+                    .fill(mp.isConnected ? accent : .gray)
                     .frame(width: 10, height: 10)
             }
             .padding()
@@ -71,7 +71,7 @@ struct RoomSelectionView: View {
 
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 11) {
-                    ForEach(ws.config.rooms) { room in
+                    ForEach(mp.config.rooms) { room in
                         Button { onSelect(room) } label: {
                             VStack(spacing: 9) {
                                 Text(room.icon).font(.system(size: 32))
@@ -102,7 +102,7 @@ struct RoomSelectionView: View {
 // MARK: - Order
 
 struct OrderView: View {
-    @ObservedObject var ws: WebSocketManager
+    @ObservedObject var mp: MultipeerManager
     let room: Room
     var onBack: () -> Void
     var onConfirmed: () -> Void
@@ -146,7 +146,7 @@ struct OrderView: View {
                         .font(.caption.bold()).kerning(1).foregroundColor(.gray)
 
                     LazyVGrid(columns: columns, spacing: 11) {
-                        ForEach(ws.config.drinks) { drink in
+                        ForEach(mp.config.drinks) { drink in
                             DrinkCard(
                                 drink: drink,
                                 qty: quantities[drink.id] ?? 0,
@@ -169,34 +169,34 @@ struct OrderView: View {
                          : "Choisissez une boisson")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
-                        .background(total > 0 && ws.isConnected ? accent : Color.gray.opacity(0.3))
-                        .foregroundColor(total > 0 && ws.isConnected ? .black : .gray)
+                        .background(total > 0 && mp.isConnected ? accent : Color.gray.opacity(0.3))
+                        .foregroundColor(total > 0 && mp.isConnected ? .black : .gray)
                         .font(.system(size: 17, weight: .bold))
                         .cornerRadius(50)
                 }
-                .disabled(total == 0 || !ws.isConnected)
+                .disabled(total == 0 || !mp.isConnected)
             }
             .padding(.horizontal).padding(.bottom, 28)
         }
         .onAppear {
-            ws.config.drinks.forEach { quantities[$0.id] = 0 }
+            mp.config.drinks.forEach { quantities[$0.id] = 0 }
         }
-        .onChange(of: ws.config.drinks.count) { _ in
-            ws.config.drinks.forEach { d in
+        .onChange(of: mp.config.drinks.count) { _ in
+            mp.config.drinks.forEach { d in
                 if quantities[d.id] == nil { quantities[d.id] = 0 }
             }
         }
-        .onChange(of: ws.confirmedOrderId) { id in if id != nil { onConfirmed() } }
+        .onChange(of: mp.confirmedOrderId) { id in if id != nil { onConfirmed() } }
     }
 
     func placeOrder() {
         var items: [String] = []
-        for d in ws.config.drinks {
+        for d in mp.config.drinks {
             let q = quantities[d.id] ?? 0
             if q > 0 { items.append(q > 1 ? "\(d.label) ×\(q)" : d.label) }
         }
         guard !items.isEmpty else { return }
-        ws.placeOrder(room: room.label, drink: items.joined(separator: ", "))
+        mp.placeOrder(room: room.label, drink: items.joined(separator: ", "))
     }
 }
 

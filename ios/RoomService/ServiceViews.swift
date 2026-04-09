@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Root
 
 struct ServiceRootView: View {
-    @ObservedObject var ws: WebSocketManager
+    @ObservedObject var mp: MultipeerManager
     @State private var showSettings = false
 
     let accent = Color(red: 0.67, green: 0.8, blue: 0.2)
@@ -22,8 +22,8 @@ struct ServiceRootView: View {
 
                 Spacer()
 
-                if !ws.orders.isEmpty {
-                    Text("\(ws.orders.count)")
+                if !mp.orders.isEmpty {
+                    Text("\(mp.orders.count)")
                         .font(.system(size: 15, weight: .heavy))
                         .padding(.horizontal, 10).padding(.vertical, 6)
                         .background(accent).foregroundColor(.black)
@@ -41,7 +41,7 @@ struct ServiceRootView: View {
                 }
 
                 Circle()
-                    .fill(ws.isConnected ? accent : .red)
+                    .fill(mp.isConnected ? accent : .red)
                     .frame(width: 10, height: 10)
             }
             .padding(.horizontal, 20).padding(.vertical, 14)
@@ -49,7 +49,7 @@ struct ServiceRootView: View {
 
             Divider().background(Color.white.opacity(0.08))
 
-            if ws.orders.isEmpty {
+            if mp.orders.isEmpty {
                 VStack(spacing: 14) {
                     Text("🛎️").font(.system(size: 56))
                     Text("En attente de commandes…")
@@ -59,9 +59,9 @@ struct ServiceRootView: View {
             } else {
                 ScrollView {
                     VStack(spacing: 12) {
-                        ForEach(ws.orders) { order in
+                        ForEach(mp.orders) { order in
                             OrderCard(order: order, accent: accent) {
-                                ws.markReady(orderId: order.id)
+                                mp.markReady(orderId: order.id)
                             }
                         }
                     }
@@ -71,7 +71,7 @@ struct ServiceRootView: View {
         }
         .background(Color(white: 0.05).ignoresSafeArea())
         .sheet(isPresented: $showSettings) {
-            SettingsView(ws: ws)
+            SettingsView(mp: mp)
         }
     }
 }
@@ -127,7 +127,7 @@ struct OrderCard: View {
 // MARK: - Settings
 
 struct SettingsView: View {
-    @ObservedObject var ws: WebSocketManager
+    @ObservedObject var mp: MultipeerManager
     @Environment(\.dismiss) var dismiss
 
     @State private var editRooms:  [Room]  = []
@@ -182,7 +182,7 @@ struct SettingsView: View {
                 ToolbarItem(placement: .navigationBarLeading)  { EditButton() }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Sauvegarder") {
-                        ws.updateConfig(AppConfig(rooms: editRooms, drinks: editDrinks))
+                        mp.updateConfig(AppConfig(rooms: editRooms, drinks: editDrinks))
                         dismiss()
                     }
                     .bold()
@@ -190,8 +190,8 @@ struct SettingsView: View {
             }
         }
         .onAppear {
-            editRooms  = ws.config.rooms
-            editDrinks = ws.config.drinks
+            editRooms  = mp.config.rooms
+            editDrinks = mp.config.drinks
         }
     }
 
