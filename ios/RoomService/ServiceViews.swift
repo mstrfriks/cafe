@@ -144,9 +144,7 @@ struct SettingsView: View {
             List {
                 Section("PIÈCES / TABLES") {
                     ForEach(editRooms) { room in
-                        Label(room.label, title: {
-                            Text(room.label).foregroundColor(.primary)
-                        }, icon: { Text(room.icon) })
+                        HStack { Text(room.icon); Text(room.label) }
                     }
                     .onDelete { idx in editRooms.remove(atOffsets: idx) }
                     .onMove  { from, to in editRooms.move(fromOffsets: from, toOffset: to) }
@@ -163,9 +161,7 @@ struct SettingsView: View {
 
                 Section("BOISSONS") {
                     ForEach(editDrinks) { drink in
-                        Label(drink.label, title: {
-                            Text(drink.label).foregroundColor(.primary)
-                        }, icon: { Text(drink.icon) })
+                        HStack { Text(drink.icon); Text(drink.label) }
                     }
                     .onDelete { idx in editDrinks.remove(atOffsets: idx) }
                     .onMove  { from, to in editDrinks.move(fromOffsets: from, toOffset: to) }
