@@ -1,6 +1,5 @@
 import Foundation
 
-@MainActor
 class WebSocketManager: ObservableObject {
     @Published var isConnected = false
     @Published var config: AppConfig
@@ -45,7 +44,8 @@ class WebSocketManager: ObservableObject {
 
         task = session.webSocketTask(with: url)
         task?.resume()
-        isConnected = true
+
+        DispatchQueue.main.async { self.isConnected = true }
 
         receive()
         send(["type": "register", "role": role])
@@ -56,9 +56,8 @@ class WebSocketManager: ObservableObject {
 
     private func receive() {
         task?.receive { [weak self] result in
-            guard let self else { return }
-            Task { @MainActor [weak self] in
-                guard let self else { return }
+            guard let self = self else { return }
+            DispatchQueue.main.async {
                 switch result {
                 case .success(let message):
                     self.isConnected = true
@@ -76,13 +75,10 @@ class WebSocketManager: ObservableObject {
     private func scheduleReconnect() {
         guard !isReconnecting else { return }
         isReconnecting = true
-        Task {
-            try? await Task.sleep(nanoseconds: UInt64(reconnectDelay * 1_000_000_000))
-            await MainActor.run {
-                self.isReconnecting = false
-                self.reconnectDelay = min(self.reconnectDelay * 2, 30)
-                self.startConnection()
-            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + reconnectDelay) {
+            self.isReconnecting = false
+            self.reconnectDelay = min(self.reconnectDelay * 2, 30)
+            self.startConnection()
         }
     }
 
@@ -105,26 +101,20 @@ class WebSocketManager: ObservableObject {
                 config = cfg
                 UserDefaults.standard.set(try? JSONEncoder().encode(cfg), forKey: "rs_config")
             }
-
         case "orders":
             if let arr = json["orders"] as? [[String: Any]] {
                 orders = arr.compactMap(parseOrder)
             }
-
         case "new_order":
             if let d = json["order"] as? [String: Any], let o = parseOrder(d) {
                 orders.insert(o, at: 0)
             }
-
         case "order_removed":
             if let id = json["orderId"] as? Int { orders.removeAll { $0.id == id } }
-
         case "order_confirmed":
             if let id = json["orderId"] as? Int { confirmedOrderId = id }
-
         case "order_ready":
             if let id = json["orderId"] as? Int { readyOrderId = id }
-
         default: break
         }
     }

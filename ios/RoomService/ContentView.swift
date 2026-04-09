@@ -6,27 +6,23 @@ struct ContentView: View {
     @StateObject private var ws = WebSocketManager()
     @State private var mode: AppMode? = nil
     @State private var serverURL = UserDefaults.standard.string(forKey: "rs_server_url") ?? ""
-    @State private var showURLField: Bool
-
-    init() {
-        let saved = UserDefaults.standard.string(forKey: "rs_server_url") ?? ""
-        _showURLField = State(initialValue: saved.isEmpty)
-    }
+    @State private var showURLField = (UserDefaults.standard.string(forKey: "rs_server_url") ?? "").isEmpty
 
     var body: some View {
-        if let mode {
-            Group {
+        Group {
+            if let mode = mode {
                 switch mode {
                 case .client:  ClientRootView(ws: ws)
                 case .service: ServiceRootView(ws: ws)
                 }
-            }
-        } else {
-            ModeSelectionView(serverURL: $serverURL, showURLField: $showURLField) { m in
-                mode = m
-                ws.connect(role: m.rawValue, serverURL: serverURL)
+            } else {
+                ModeSelectionView(serverURL: $serverURL, showURLField: $showURLField) { m in
+                    mode = m
+                    ws.connect(role: m.rawValue, serverURL: serverURL)
+                }
             }
         }
+        .preferredColorScheme(.dark)
     }
 }
 
@@ -44,7 +40,6 @@ struct ModeSelectionView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                // Brand
                 VStack(spacing: 14) {
                     Text("🏨").font(.system(size: 80))
                     Text("Room Service")
@@ -57,7 +52,6 @@ struct ModeSelectionView: View {
 
                 Spacer()
 
-                // Server URL field
                 VStack(spacing: 12) {
                     if showURLField {
                         TextField("https://your-app.onrender.com", text: $serverURL)
@@ -69,7 +63,6 @@ struct ModeSelectionView: View {
                             .disableAutocorrection(true)
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
-                            .transition(.opacity.combined(with: .move(edge: .top)))
                     }
 
                     Button(action: { withAnimation { showURLField.toggle() } }) {
@@ -81,7 +74,6 @@ struct ModeSelectionView: View {
                 .padding(.horizontal, 28)
                 .padding(.bottom, 24)
 
-                // Mode buttons
                 VStack(spacing: 12) {
                     Button(action: { onSelect(.client) }) {
                         Label("Commander", systemImage: "cup.and.saucer.fill")
