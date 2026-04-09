@@ -181,7 +181,7 @@ struct OrderView: View {
         .onAppear {
             ws.config.drinks.forEach { quantities[$0.id] = 0 }
         }
-        .onChange(of: ws.config.drinks) { _ in
+        .onChange(of: ws.config.drinks.count) { _ in
             ws.config.drinks.forEach { d in
                 if quantities[d.id] == nil { quantities[d.id] = 0 }
             }

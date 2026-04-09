@@ -84,7 +84,6 @@ struct OrderCard: View {
     var onReady: () -> Void
 
     @State private var timeText = ""
-    let timer = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
 
     var body: some View {
         HStack(spacing: 16) {
@@ -116,12 +115,12 @@ struct OrderCard: View {
         .cornerRadius(18)
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.07), lineWidth: 1))
         .onAppear { updateTime() }
-        .onReceive(timer) { _ in updateTime() }
     }
 
     func updateTime() {
         let s = Int(-order.at.timeIntervalSinceNow)
         timeText = s < 60 ? "\(s)s" : "\(s / 60)min"
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15) { updateTime() }
     }
 }
 
